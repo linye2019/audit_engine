@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input - Medicare Audit</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: var(--space-3); background: var(--color-background); font-family: var(--font-body); color: var(--color-on-surface); }
+  .row { display: flex; gap: var(--space-4); align-items: flex-start; margin-bottom: var(--space-2); flex-wrap: wrap; }
+  .label { font-size: var(--font-size-caption); font-weight: var(--font-weight-eyebrow); color: var(--color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; min-width: 92px; line-height: var(--size-input); white-space: nowrap; flex-shrink: 0; }
+  .divider { border: none; border-top: 1px solid var(--color-border); margin: var(--space-3) 0; }
+
+  /* @component-css-start */
+  .input-group { display: flex; flex-direction: column; gap: var(--space-1); min-width: 180px; flex-shrink: 0; }
+  .input-group-flex { flex: 1 1 0; min-width: 240px; }
+  .input-label { font-size: var(--font-size-caption); font-weight: var(--font-weight-lead); color: var(--color-on-surface); white-space: nowrap; }
+  .input-wrapper { position: relative; display: flex; align-items: center; }
+  .input-field { width: 100%; height: var(--size-input); padding: var(--space-2) var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-on-surface); outline: none; transition: border-color .15s, box-shadow .15s; }
+  .input-field::placeholder { color: var(--color-on-surface-variant); }
+  .input-field:hover { border-color: var(--color-on-surface-variant); }
+  .input-field:focus { border-color: var(--ring); box-shadow: 0 0 0 3px var(--interactive-focus); }
+  .input-field:disabled { background: var(--color-surface-dim); color: var(--color-on-surface-variant); cursor: not-allowed; }
+  .input-field:disabled:hover { border-color: var(--color-border); }
+  .input-helper { font-size: var(--font-size-caption); color: var(--color-on-surface-variant); }
+  .search-icon { position: absolute; left: var(--space-3); width: var(--size-icon-sm); height: var(--size-icon-sm); color: var(--color-on-surface-variant); pointer-events: none; }
+  .input-search { border-radius: var(--radius-lg); padding-left: var(--space-8); }
+  .textarea-field { width: 100%; min-height: 80px; padding: var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-on-surface); outline: none; resize: vertical; transition: border-color .15s, box-shadow .15s; }
+  .textarea-field::placeholder { color: var(--color-on-surface-variant); }
+  .textarea-field:hover { border-color: var(--color-on-surface-variant); }
+  .textarea-field:focus { border-color: var(--ring); box-shadow: 0 0 0 3px var(--interactive-focus); }
+  /* @component-css-end */
+</style>
+</head>
+<body>
+
+  <div class="row">
+    <span class="label">默认输入</span>
+    <div class="input-group">
+      <span class="input-label">规则名称</span>
+      <input class="input-field" type="text" placeholder="请输入规则名称...">
+    </div>
+    <div class="input-group">
+      <span class="input-label">规则名称</span>
+      <input class="input-field" type="text" value="DRG-001 诊断规则" placeholder="请输入规则名称...">
+      <span class="input-helper">支持模糊搜索规则编码或名称</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">审核状态</span>
+      <input class="input-field" type="text" value="已提交审核" disabled>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="row">
+    <span class="label">搜索输入</span>
+    <div class="input-group input-group-flex">
+      <div class="input-wrapper">
+        <img src="https://cdn.jsdelivr.net/npm/lucide-static@1.8.0/icons/search.svg" width="16" height="16" class="search-icon" alt="搜索">
+        <input class="input-field input-search" type="text" placeholder="搜索规则编码或名称...">
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="label">多行输入</span>
+    <div class="input-group input-group-flex">
+      <span class="input-label">审核意见</span>
+      <textarea class="textarea-field" placeholder="请输入审核意见..."></textarea>
+    </div>
+  </div>
+
+</body>
+</html>

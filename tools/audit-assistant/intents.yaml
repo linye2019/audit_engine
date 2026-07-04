@@ -1,0 +1,43 @@
+# 意图映射表
+# 用户问题模式 → 意图 → 执行动作
+
+intents:
+  - pattern: "(为什么|怎么|为何).*(拦截|拒绝|警告|不通过|失败)"
+    intent: explain_audit
+    action: query_audit_result + translate
+    data_source: audit_result, rule_items, RULE_BOOK.md
+
+  - pattern: "(是什么|查询|查一下|解释).*(规则|限定)"
+    intent: query_rule
+    action: query_rule_by_code
+    data_source: rule_items, RULE_BOOK.md
+
+  - pattern: "(在不在|有没有|查一下|查).*(目录|药品|耗材|项目)"
+    intent: query_catalog
+    action: query_catalog_by_name
+    data_source: YPML, FWXM, HCML
+
+  - pattern: "(测试|pytest|test).*(失败|错误|不过|挂了|报错)"
+    intent: diagnose_test
+    action: parse_junit_xml + classify_failure
+    data_source: reports/test_rules_results.xml
+
+  - pattern: "(有哪些|列出|枚举).*(规则|YP|HC|FW|BZ)"
+    intent: list_rules
+    action: query_rules_by_pillar
+    data_source: rule_items
+
+  - pattern: "(有哪些|列出).*(pre_check|mid_check|end_check|post_audit)"
+    intent: list_stage_rules
+    action: query_rules_by_stage
+    data_source: rule_items
+
+  - pattern: "(修改|修复|修正|更改).*(测试|数据|规则)"
+    intent: suggest_fix
+    action: diagnose + generate_fix_suggestion
+    data_source: test_rules_from_rulebook.py, RULE_BOOK.md
+
+  - pattern: ".(帮助|help|/?)$"
+    intent: show_help
+    action: print_available_capabilities
+    data_source: null

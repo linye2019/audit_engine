@@ -1,0 +1,15 @@
+services:
+  audit-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: audit-engine:latest
+    container_name: medicare-audit-engine
+    ports:
+      - "8000:8000"
+    volumes:
+      # 挂载数据库文件，避免容器删除后数据丢失
+      - ./medicare_engine.db:/app/medicare_engine.db
+    environment:
+      - MEDICARE_DB_PATH=medicare_engine.db
+    restart: unless-stopped

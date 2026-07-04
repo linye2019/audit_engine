@@ -1,0 +1,1108 @@
+*html {
+  background-image: url(about:blank);
+  background-attachment: fixed;
+}
+
+body,
+div,
+p,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+ol,
+ul,
+li {
+  list-style: none;
+}
+
+#wcagnav {
+  height: 55px;
+}
+.fold_bfr_nav{
+  height: 10px !important;
+  overflow: hidden;
+  padding: 0 !important;
+  opacity: 0;
+  position: fixed;
+  top: 0;
+  z-index: 99997 !important;
+}
+/* 红色选中框 */
+.bl {
+  outline: red solid thick;
+}
+
+/* 起始点 */
+.startCricleDot {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background-color: none;
+  overflow: hidden;
+  margin: -5px 0 0 -5px;
+  float: left !important;
+}
+
+/* 结束点 */
+.endCricleDot {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background-color: none;
+  overflow: hidden;
+  margin: -5px 0 0 -5px;
+  float: left !important;
+}
+/* 轮播区和浮动区提示 */
+.barrierfree_tips{
+  display: block;
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
+.mark_bl{
+outline: none;
+}
+/* 读到某个点添加标记色 */
+.tbl {
+  background: #1e9fff !important;
+}
+
+/*默认选中色是tbl选中色蓝色 如果进出某个模块 前后的点点需要特定选中色 将Barrier free.js中 涉及这个类的地方注释解除即可 */
+.specificSelectedColor {
+  background: #000 !important;
+}
+
+.toolbar-one-bg {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+  color: #fff;
+  width: 65px;
+  height: 75px;
+  border-radius: 5px;
+  margin-right: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.toolbar-toggle {
+  display: none;
+}
+
+.accessiblereading-toolbar{
+  width: 1100px;
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+.accessiblereading-toolbar-bottom {
+  width: 1022px;
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+.ymlx{
+  width: 120px;
+  background: url(../icons/ymlx.png) no-repeat center !important;
+}
+.w_h{
+width: 120px;
+height: 60px;
+cursor: pointer;
+}
+.accessiblereading-toolbar-item {
+  border-radius: 8px;
+  display: inline-block;
+  color: #000;
+  width: 60px;
+  height: 50px;
+  margin-right: 10px;
+  margin-top: 25px;
+  position: relative;
+  cursor: pointer;
+  font-size: 12px;
+    background-color: #ddd;
+}
+
+.accessiblereading-toolbar-item:hover {
+  color: #fff;
+  background: url(../icons/hoverBackground.svg) no-repeat center 0px;
+}
+
+.toolbar-item-bg {
+  height: 100%;
+}
+
+
+.horizontal-div {
+  width: 93%;
+  height: 50%;
+  padding: 12px 0;
+}
+
+.horizontal-div-two {
+  width: 93%;
+  height: 48%;
+}
+
+.horizontal-title {
+  display: inline-block;
+}
+
+/* 灰度切换 */
+.toolbar-gray-bg {
+  height: 100%;
+  background: url(../icons/gray.png);
+  background-position: 50% 24%;
+  background-repeat: no-repeat;
+}
+
+/* 音量控制 */
+
+.toolbar-item-voice .toolbar-item-bg.bg-middle {
+  position: absolute;
+  height: 66px;
+  width: 1px;
+  top: 5px;
+  left: 90px;
+  background: #fff
+}
+
+.accessiblereading-toolbar-item .toolbar-item-title {
+  position: absolute;
+  top:-27px;
+  font-size: 14px;
+  width: 60px;
+  text-align: center;
+  color: #fff;
+}
+
+.toolbar-item-screen,
+.toolbar-item-pagezoom,
+.toolbar-item-line,
+.toolbar-item-seeingeye {
+  margin-right: 15px;
+}
+
+.toolbar-item-text .toolbar-item-bg {
+  background-position: -1405px 0;
+}
+
+.toolbar-item-screen .toolbar-item-bg {
+  background-position: -145px 0;
+}
+
+.toolbar-item-textzoom,
+.toolbar-item-pagezoom {
+  width: 110px;
+}
+
+.toolbar-item-textzoom .toolbar-item-bg,
+.toolbar-item-pagezoom .toolbar-item-bg {
+  display: inline-block;
+  width: 55px;
+}
+
+.toolbar-item-textzoom .toolbar-item-bg.bg-left {
+  background-position: -1595px 0;
+}
+
+.toolbar-item-textzoom .toolbar-item-bg.bg-right {
+  background-position: -1515px 0;
+}
+
+.toolbar-item-pagezoom .toolbar-item-bg.bg-left {
+  background-position: -1055px 0;
+}
+
+.toolbar-item-pagezoom .toolbar-item-bg.bg-right {
+  background-position: -975px 0;
+}
+
+.toolbar-item-bigmouse .toolbar-item-bg {
+  background-position: -325px 0;
+}
+
+.toolbar-item-line .toolbar-item-bg {
+  background-position: -55px 0;
+}
+
+.toolbar-item-voice{
+  width: 60px;
+  position: relative;
+}
+
+.toolbar-item-auxiliaryScreen{
+  width: 60px;
+  position: relative;
+}
+.toolbar-item-switch{
+  width: 60px;
+  position: relative;
+  background:url(../icons/hoverBackground.svg) no-repeat center 0px;
+    color: #fff;
+}
+.toolbar-item-help{
+  width: 60px;
+  position: relative;
+}
+
+.toolbar-item-readtype .toolbar-item-bg {
+  background-position: -1135px 0;
+}
+
+.toolbar-item-seeingeye .toolbar-item-bg {
+  background-position: -865px 0;
+}
+
+.toolbar-item-backgo {
+  width: 100px;
+}
+
+.toolbar-item-backgo .toolbar-item-bg {
+  display: inline-block;
+  width: 50px;
+}
+
+.toolbar-item-backgo .toolbar-item-bg.bg-left {
+  background-position: -250px 0;
+}
+
+.toolbar-item-backgo .toolbar-item-bg.bg-right {
+  background-position: -700px 0;
+}
+
+.toolbar-item-end {
+  width: 90px;
+  position: relative;
+}
+
+.toolbar-item-end .bg-top,
+.toolbar-item-end .bg-bottom {
+  display: inline-block;
+  width: 100%;
+  height: 53px;
+  line-height: 53px;
+}
+
+.toolbar-item-end .bg-middle {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 50%, #d8d8d8 100%);
+  width: 100%;
+}
+
+.toolbar-item-end .toolbar-item-bg {
+  display: inline-block;
+  width: 50px;
+  height: 53px;
+}
+
+.toolbar-item-end .bg-top .toolbar-item-bg {
+  background-position: -1240px -15px;
+}
+
+.toolbar-item-end .bg-bottom .toolbar-item-bg {
+  background-position: -430px -20px;
+}
+
+.toolbar-item-end span {
+  position: absolute;
+  left: 50px;
+}
+
+.toolbar-item-end .bg-top span {
+  top: 3px;
+}
+
+.toolbar-item-end .bg-bottom span {
+  top: 55px;
+}
+
+.toolbar-toggle-left {
+  float: left;
+  font-size: 14px;
+  height: 75px;
+}
+
+.toolbar-toggle-right {
+  float: right;
+  margin-right: 10px;
+  height: 75px;
+}
+
+.toolbar-toggle-left>div {
+  box-sizing: border-box;
+  display: inline-block;
+  margin-right: 5px;
+  padding: 5px 10px;
+  height: 70px;
+  color: #fff;
+}
+
+.toolbar-toggle-left .w_h:hover {
+  background: linear-gradient(180.00deg, #f00 0%, #be0000 100%);
+  border-radius: 5px;
+}
+.page-type-title,.page-type-value{
+  visibility: hidden;
+}
+.page-type-title,
+.service-area-title,
+.article-area-title,
+.nav-area-title,
+.window-area-title {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.area-title {
+  cursor: pointer;
+}
+.dpzy_bg{
+  width:90px;
+  background: linear-gradient(180.00deg, #ffa148 0%, #de6c00 100%) !important;
+} 
+
+.toolbar-item-close {
+  background: url(../icons/hoverBackground.svg) no-repeat center 0px;
+}
+
+/* 颜色块位置 */
+.color-toolbar-pannel {
+  width: 60px;
+  height: 50px;
+  overflow: hidden;
+  background-color: #eee;
+  display: none;
+}
+.color-toolbar-pannelOne {
+  width: 154px;
+  height: 192px;
+  left: 100px;
+  z-index: 999;
+}
+
+.voice-contrl-pannel {
+  width: 130px;
+  left: 677px;
+}
+
+.color-toolbar-pannel .color-item {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+  margin: 0 auto;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.color-toolbar-pannel .white-black-blue {
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.color-toolbar-pannel .blue-yellow-white {
+  background-color: #2274EC;
+  color: rgba(255, 234, 25, 0.85);
+}
+
+.color-toolbar-pannel .yellow-black-blue {
+  background-color: #FFC811;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.color-toolbar-pannel .black-yellow-white {
+  background-color: #000000;
+  color: #FEC404;
+}
+
+.color-toolbar-pannel .default-color {
+  /* background-color: #C1C1C1; */
+  color: #000;
+}
+
+.voice-contrl-pannel .voice-contrl-item {
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* 辅屏 */
+
+#gettextmessagebox input {
+  border: 0;
+  outline: none;
+}
+
+#gettextmessagebox input:hover {
+  background: #b3b1b1;
+  outline: none;
+  color: #000;
+}
+
+.disabilitiesLanguage {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 9999999999;
+  background: fixed;
+  _position: absolute;
+  _bottom: auto;
+  _top: expression(eval(document.documentElement.scrollTop+document.documentElement.clientHeight-this.offsetHeight-(parseInt(this.currentStyle.marginTop, 10)||0)-(parseInt(this.currentStyle.marginBottom, 10)||0)));
+}
+
+.disabilitiesLanguage .disabilitiesFooterBg {
+  width: 100%;
+  height: 160px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #d4d4d4;
+}
+
+.disabilitiesLanguage .LanguageMain {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 99999999;
+  width: 100px;
+}
+
+.disabilitiesLanguage .LanguageMain ul {
+  padding: 0;
+  margin: 0;
+  float: left;
+}
+
+.disabilitiesLanguage .font_titleBar li {
+  float: left;
+}
+#gettextmessagebox button {
+  border: 0;
+  outline: none;
+}
+
+#gettextmessagebox button:hover {
+  background: #b3b1b1;
+  outline: none;
+  color: #000;
+}
+
+.disabilitiesLanguage li button {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  color: #000;
+  font-size: 24px;
+  background-color: #81868c;
+  margin: 1px;
+}
+.disabilitiesLanguage li.disabilitiesNow button {
+  background-color: #355e92;
+  color: #fff;
+}
+.disabilitiesLanguage li.disabilitiesNow button:hover {
+  background-color: #81868c;
+}
+.disabilitiesLanguage li.barrierfree_open button {
+  background-color: #355e92;
+  color: #fff;
+}
+.disabilitiesLanguage li.barrierfree_close button {
+  background-color: #81868c;
+}
+
+.disabilitiesLanguage .LanguageSpell li button {
+  width: 98px;
+  height: 45px;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+.disabilitiesLanguage li input {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  color: #000;
+  font-size: 24px;
+  background-color: #81868c;
+  margin: 1px;
+}
+
+.disabilitiesLanguage li.disabilitiesNow input {
+  background-color: #355e92;
+  color: #fff;
+}
+
+.disabilitiesLanguage li.disabilitiesNow input:hover {
+  background-color: #81868c;
+}
+
+.disabilitiesLanguage li.barrierfree_open input {
+  background-color: #355e92;
+  color: #fff;
+}
+
+.disabilitiesLanguage li.barrierfree_close input {
+  background-color: #81868c;
+}
+
+.disabilitiesLanguage .LanguageSpell li input {
+  width: 98px;
+  height: 45px;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.disabilitiesLanguage .Languagetext {
+  width: 100%;
+  position: absolute;
+  top: 10px;
+  left: 130px;
+  z-index: 99999999;
+  overflow: scroll;
+}
+
+.disabilitiesLanguage .LanguageTextMin {
+  padding-right: 140px;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent {
+  width: 100%;
+  height: 142px;
+  background: #fff;
+  overflow: auto
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent p {
+  width: 90%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent tr {
+  display: table-row;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent table td {
+  font-size: 32px !important;
+  line-height: 1.2em !important;
+  font-family: "Microsoft YaHei";
+  text-align: center;
+  vertical-align: middle;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent table td.barrierfree_pinyin {
+  font-size: 20px !important;
+  display: table-cell !important;
+  padding: 5px;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent table td.barrierfree_text {
+  font-size: 32px !important;
+  display: table-cell !important;
+}
+
+.disabilitiesLanguage .LanguageTextMin .LanguageTextContent table td#helper_messageBoxText {
+  display: table-cell !important;
+}
+
+samp {
+  font: inherit;
+}
+
+/* 站外跳转提示 遮罩层 */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100000;
+  width: 100%;
+  height: 100%;
+  background: #f6f4f5;
+}
+
+#prompt-modal {
+  width: 720px;
+  height: 190px;
+  z-index: 100001;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  right: 0%;
+  bottom: 0;
+  margin: auto;
+  opacity: 1;
+  background-color: #b73535;
+  text-align: center;
+}
+
+#prompt-modal span {
+  font-size: 30px;
+  line-height: 70px;
+  color: #FFFFFF;
+}
+
+a.link-tag-color-white {
+  color: #fff !important;
+}
+
+a.link-tag-color-blue {
+  color: #2274EC !important;
+}
+
+.white-black-blue {
+  background-color: #fff !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.blue-yellow-white {
+  background-color: #2274EC !important;
+  color: rgba(255, 234, 25, 0.85) !important;
+}
+
+.yellow-black-blue {
+  background-color: #FFC811 !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.black-yellow-white {
+  background-color: #000000 !important;
+  color: #FEC404 !important;
+}
+
+/* -------------------  zhailei  ---------------------------- */
+.accessiblereading-toolbar-contain {
+  background-color: #4D4D4D;
+  padding: 15px 0;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 99996 !important;
+  box-sizing: content-box;
+  user-select: none;
+}
+
+.accessiblereading-toolbar-contain-body {
+    height: 100%;
+    width: 1080px;
+    margin: 0 auto;
+    display: table;
+    margin-top: 25px;
+}
+/* 读屏专用 */
+.accessibility_dpzy{
+  width: 90px;
+  margin-left: 10px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.dpzy_icon{
+  width: 90px;
+  height: 50px;
+}
+.dpzy_icon:hover{
+  width: 90px;
+  height: 50px;
+}
+.fun_button_list.blind {
+  line-height: 124px;
+}
+
+.fun_button_list.width_f {
+  width: 90px;
+  height: 50px;
+  line-height: 50px;
+  background: linear-gradient(180.00deg, #ffa148 0%, #de6c00 100%);
+}
+.fun_button_list {
+  border-radius: 8px;
+  margin: 0 0 0 10px;
+  background: #ddd;
+  cursor: pointer;
+  color: #000;
+  float: left;
+  height: 50px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 50px;
+  position: relative;
+}
+.fun_button_list:hover {
+  color: #fff;
+}
+
+.fun_button_list.two_icon_btn {
+  line-height: normal;
+}
+
+.fun_button_list.two_icon_btn div {
+  display: inline-block;
+  width: 60px;
+  height: 50px;
+}
+
+
+.fun_button_list .only_text {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+
+
+/* 页面缩放 */
+
+.fun_button_list .color {
+  width: 60px;
+  height: 40px;
+  line-height: 50px;
+  color: #000;
+  padding-top: 10px;
+  text-align: center;
+}
+.fun_button_list .color:hover {
+  color: #fff;
+}
+.fun_button_list .change_color {
+  background: url(../icons/color.svg) no-repeat center center;
+}
+
+.showChangeColor{
+  display: block;
+}
+.hideChangeColor{
+display: none;
+}
+
+.fun_button_list .text_color {
+  color: #fff;
+  position: absolute;
+  top: -32px;
+  left: 0px;
+  width: 60px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+}
+
+.fun_button_list_color .text_color {
+  position: absolute;
+  top: -32px;
+  width: 60px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+}
+
+/* 大鼠标 */
+.fun_button_list .bigMouse {
+  width: 60px;
+  height: 50px;
+}
+
+/* 辅助线 */
+.fun_button_list .line {
+  width: 60px;
+  height: 50px;
+}
+
+.fun_button_list .auxiliary_screen {
+  width: 60px;
+  height:50px;
+  line-height: 50px;
+}
+
+
+/* 音量设置 */
+.fun_button_list .voice_set {
+  position: relative;
+  width: 60px;
+}
+
+.voice_btn_close{
+  height: 50px;
+  display: block;
+  line-height: 66px;
+  width: 60px;
+  text-align: center;
+}
+.voice_btn_close:hover {
+  color: #fff;
+}
+.voice_btn_open{
+  display: none;
+  height: 50px;
+  line-height: 66px;
+  width: 60px;
+  text-align: center;
+  color: #000;
+}
+.voice_btn_open:hover {
+  color: #fff;
+}
+.readtype_btnIcon_open{
+  display: block;
+  line-height: 66px;
+  height: 50px;
+}
+.readtype_btnIcon_close{
+  line-height: 66px;
+  height: 50px;
+  display: none;
+}
+
+.voice_speed_btn {
+  height: 100% !important;
+  width: 60px;
+  border: none !important;
+  color: #000;
+}
+.voice_speed_btn:hover {
+  color: #fff;
+}
+#voice-control-select {
+  height: 25px;
+  margin-top: 5px;
+  border-left: 1px solid #767676 !important;
+}
+
+#voice-control-select.bg-right-2 {
+  position: absolute;
+  height: 65px;
+  top: 5px;
+  width: 20px;
+  right: 0;
+  margin-top: 0;
+}
+
+
+.fun_button_list.double_btn .read_set {
+  background: url(../icons/volume_black.svg) no-repeat center center !important;
+}
+
+.fun_button_list.width_color {
+  width: 60px;
+  height: 50px;
+}
+
+/* 重置   移动 */
+.fun_button_list.double_btn .reset {
+  width: 60px;
+  height: 50px;
+}
+.fun_button_list.double_btn .reset:hover {
+  width: 60px;
+  height: 50px;
+}
+
+
+/* 帮助   关闭 */
+.fun_button_list.double_btn .help {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+.fun_button_list.double_btn .help:hover {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+  
+}
+.fun_button_list.double_btn .bfr_close {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+  color: #fff;
+}
+
+
+.fun_button_list p span {
+  color: #fff;
+}
+
+.fun_button_list:first-child {
+  margin: 0;
+}
+
+.button_list.on {
+  background: #ffffff;
+  color: #066ab8;
+}
+
+.button_list:hover:not(.on) {
+  height: 50px;
+  background: url(../icons/hoverBackground.svg) no-repeat center 0px;
+}
+.allkeep_red{
+  background: url(../icons/hoverBackground.svg) no-repeat center 0px;
+}
+
+.fun_button_list.width_a {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+
+.fun_button_list.width_b {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+
+.fun_button_list.width_c {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+
+.fun_button_list.width_d {
+  width: 60px;
+  height: 50px;
+  line-height: 50px;
+}
+
+.fun_button_list.width_e {
+  width: 60px;
+  height: 50px;
+  line-height: 40px;
+}
+
+.accessiblereading-toolbar-contain.fixed-right {
+  position: fixed;
+  width: 134px;
+  height: 600px;
+  top: 20px;
+  right: 20px;
+}
+
+.accessiblereading-toolbar-contain.fixed-right .accessiblereading-toolbar-contain-body {
+  width: 114px;
+}
+
+.accessiblereading-toolbar-contain.fixed-right .fun_button_list {
+  float: none;
+  width: 100%;
+  margin: 0;
+}
+
+.fun_button_list_color{
+  border-radius: 8px;
+  margin: 0 0 0 10px;
+  background: #ddd;
+  cursor: pointer;
+  color: #fff;
+  float: left;
+  height: 50px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 50px;
+}
+.voice-contrl-pannel {
+  background-color: #eee;
+  position: absolute;
+  top: 2px;
+  display: none;
+  border: 1px solid #CCC;
+  box-shadow: 4px 4px 8px -4px #ddd;
+}
+
+.accessiblereading-toolbar-item .oldMan {
+  background: url(../icons/guideBlind_white.svg) no-repeat center 10px
+}
+
+.accessiblereading-toolbar-item .blind_close {
+  background: url(../icons/close_white.svg) no-repeat 15px center;
+}
+.accessiblereading-toolbar-item .blind_auxiliaryScreen {
+  height: 50px;
+  line-height: 66px;
+  width: 60px;
+  text-align: center;
+  color: #000;
+}
+.accessiblereading-toolbar-item .blind_auxiliaryScreen:hover {
+  height: 50px;
+  line-height: 66px;
+  width: 60px;
+  text-align: center;
+  color: #fff;
+}
+#barrierfree_container {
+  position: inherit;
+}
+
+.vertical_demo {
+  position: fixed;
+  width: 130px;
+  height: 600px;
+  right: 10px;
+  top: 300px;
+  margin-top: -300px;
+  background: #626262;
+  z-index: 99999999;
+}
+
+#dragDiv {
+  display: none;
+}
+
+.action_bar_list.set_voice_warp {
+  position: relative;
+}
+
+.action_bar_list.set_voice_warp .action_bar_menu {
+  display: none;
+}
+
+.action_bar_list {
+  background-color: #5d5d5d !important;
+}
+
+.action_bar_list:hover:not(.on) {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  color: #fff;
+}
+
+/*放大镜  */
+#zoomPicBox {
+  display: block;
+  height: 100%;
+  height: 100%;
+}
+
+/*验证码  */
+.activeScalePic {
+  transform: scale(2);
+  transform-origin: left top;
+  border: 1px solid #CCC;
+  background-color: #FFF !important;
+}
+svg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  width: 50%;
+  height: 50%;
+}

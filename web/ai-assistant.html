@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 医保审核智能体 — 自然语言交互助手</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-dark: #1557b0;
+    --primary-light: #e8f0fe;
+    --danger: #d93025;
+    --danger-light: #fce8e6;
+    --warning: #f9ab00;
+    --warning-light: #fef7e0;
+    --success: #1e8e3e;
+    --success-light: #e6f4ea;
+    --info: #1557b0;
+    --info-light: #e8f0fe;
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --border: #e0e6ed;
+    --text: #1a202c;
+    --text-secondary: #5a6672;
+    --text-tertiary: #8a95a1;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-lg: 16px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --mono: "SF Mono", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ===== Top Bar ===== */
+  .topbar {
+    background: linear-gradient(135deg, #1a56c4 0%, #1a73e8 100%);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(26,115,232,0.2);
+    z-index: 100;
+    position: relative;
+  }
+  .topbar-title {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-title .icon {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+  .topbar-title .subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-left: 4px;
+  }
+  .topbar-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+  }
+  .topbar-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.95;
+  }
+  .topbar-stats .stat strong {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--font);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+  .btn-primary { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-primary:hover { background: rgba(255,255,255,0.3); }
+  .btn-ghost { background: transparent; color: rgba(255,255,255,0.9); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+    font-size: 12px;
+    margin-left: 16px;
+  }
+  .api-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34a853;
+  }
+  .api-status.offline .dot { background: #d93025; }
+  .api-status.loading .dot { background: #f9ab00; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ===== Main Layout ===== */
+  .main {
+    display: flex;
+    height: calc(100vh - 62px);
+    gap: 0;
+  }
+
+  /* ===== Left Panel: Capabilities ===== */
+  .panel-left {
+    width: 280px;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .capability-section {
+    margin-bottom: 16px;
+  }
+  .capability-section h3 {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 6px;
+  }
+  .capability-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cap-btn {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font);
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .cap-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateX(2px);
+  }
+  .cap-btn .cap-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .cap-btn .cap-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .cap-btn .cap-title {
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .cap-btn .cap-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .cap-btn.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
+  }
+
+  .quick-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+  }
+  .quick-actions h3 {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 6px;
+  }
+  .quick-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .quick-tag {
+    padding: 5px 10px;
+    background: #f1f5f9;
+    border-radius: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .quick-tag:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* ===== Center Panel: Chat ===== */
+  .panel-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* Chat Header */
+  .chat-header {
+    padding: 12px 20px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .agent-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 8px rgba(26,115,232,0.2);
+  }
+  .agent-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .agent-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .agent-status {
+    font-size: 11px;
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .agent-status .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+
+  /* Chat Messages */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .message {
+    display: flex;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .message.user {
+    flex-direction: row-reverse;
+  }
+  .message.bot {
+    flex-direction: row;
+  }
+
+  .msg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .msg-avatar.user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  .msg-avatar.bot {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  }
+
+  .msg-content {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .message.user .msg-content {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .message.bot .msg-content {
+    background: var(--card-bg);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .msg-meta {
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0.7;
+  }
+  .message.user .msg-meta {
+    text-align: right;
+  }
+
+  .msg-source {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    font-size: 10px;
+    margin-top: 6px;
+    color: rgba(255,255,255,0.8);
+  }
+  .message.bot .msg-source {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .msg-code {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    margin-top: 8px;
+    overflow-x: auto;
+  }
+  .msg-code .json-key { color: #9cdcfe; }
+  .msg-code .json-string { color: #ce9178; }
+  .msg-code .json-number { color: #b5cea8; }
+
+  .msg-list {
+    margin-top: 8px;
+    padding-left: 16px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Chat Input */
+  .chat-input-bar {
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: #f1f5f9;
+    border-radius: 16px;
+    padding: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .input-wrapper:focus-within {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+  }
+  .chat-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: var(--font);
+    resize: none;
+    min-height: 36px;
+    max-height: 120px;
+    outline: none;
+    color: var(--text);
+  }
+  .chat-input::placeholder {
+    color: var(--text-tertiary);
+  }
+  .input-actions {
+    display: flex;
+    gap: 6px;
+    padding-right: 4px;
+  }
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+  }
+  .action-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .send-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+  }
+  .send-btn:active {
+    transform: translateY(0);
+  }
+  .send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ===== Right Panel: Context ===== */
+  .panel-right {
+    width: 320px;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .context-section {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .context-section:last-child {
+    border-bottom: none;
+  }
+  .context-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-card .stat-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.2;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+  .stat-card.yp .stat-num { color: #1a73e8; }
+  .stat-card.fw .stat-num { color: #1e8e3e; }
+  .stat-card.hc .stat-num { color: #f29900; }
+  .stat-card.bz .stat-num { color: #d93025; }
+
+  .recent-rules {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .recent-rule-item {
+    padding: 8px 10px;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .recent-rule-item:hover {
+    background: var(--primary-light);
+    border-left-color: var(--primary);
+  }
+  .recent-rule-item .rr-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .recent-rule-item .rr-name {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .quick-help {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .quick-help ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .quick-help li {
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .quick-help li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-size: 10px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .history-item {
+    padding: 6px 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-item:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--primary); }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-tertiary);
+  }
+  .empty-state .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  .empty-state .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .empty-state .empty-desc {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .empty-state .empty-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .empty-action-btn {
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .empty-action-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===== Top Bar ===== -->
+<div class="topbar">
+  <div class="topbar-title">
+    <span class="icon">🤖</span>
+    <span>AI 医保审核智能体</span>
+    <span class="subtitle">Medicare Audit Agent</span>
+  </div>
+  <div class="topbar-stats">
+    <div class="stat"><strong id="statRules">0</strong> 条规则</div>
+    <div class="stat"><strong id="statTests">0</strong> 个测试</div>
+    <div class="stat"><strong id="statCoverage">0%</strong> 覆盖率</div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="clearChat()">🗑️ 清空对话</button>
+    <button class="btn btn-primary btn-sm" onclick="showQuickStart()">💡 快速开始</button>
+    <div class="api-status" id="apiStatus">
+      <span class="dot"></span>
+      <span id="apiStatusText">连接中...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Main Layout ===== -->
+<div class="main">
+
+  <!-- ===== Left Panel: Capabilities ===== -->
+  <div class="panel-left">
+    <div class="panel-header">🚀 智能体能力</div>
+    <div class="panel-body">
+      <div class="capability-section">
+        <h3>对话助手</h3>
+        <div class="capability-grid">
+          <button class="cap-btn" onclick="sendMessage('为什么这个药品被拦截了？')">
+            <span class="cap-icon">💬</span>
+            <span class="cap-content">
+              <span class="cap-title">解释审核结果</span>
+              <span class="cap-desc">用自然语言解释规则触发原因</span>
+            </span>
+          </button>
+          <button class="cap-btn" onclick="sendMessage('YP_SYZ 是什么规则？')">
+            <span class="cap-icon">📋</span>
+            <span class="cap-content">
+              <span class="cap-title">查询规则</span>
+              <span class="cap-desc">按规则编码查询详情</span>
+            </span>
+          </button>
+          <button class="cap-btn" onclick="sendMessage('查一下阿莫西林')">
+            <span class="cap-icon">🔍</span>
+            <span class="cap-content">
+              <span class="cap-title">查询目录</span>
+              <span class="cap-desc">药品/项目/耗材目录查询</span>
+            </span>
+          </button>
+          <button class="cap-btn" onclick="sendMessage('测试为什么失败？')">
+            <span class="cap-icon">🔧</span>
+            <span class="cap-content">
+              <span class="cap-title">诊断问题</span>
+              <span class="cap-desc">测试失败诊断与修复建议</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="capability-section">
+        <h3>主动分析</h3>
+        <div class="capability-grid">
+          <button class="cap-btn" onclick="runImpactAnalysis()">
+            <span class="cap-icon">📊</span>
+            <span class="cap-content">
+              <span class="cap-title">变更影响分析</span>
+              <span class="cap-desc">对比规则变更前后差异</span>
+            </span>
+          </button>
+          <button class="cap-btn" onclick="runConflictDetection()">
+            <span class="cap-icon">⚠️</span>
+            <span class="cap-content">
+              <span class="cap-title">冲突检测</span>
+              <span class="cap-desc">检测规则逻辑冲突</span>
+            </span>
+          </button>
+          <button class="cap-btn" onclick="runCoverageAnalysis()">
+            <span class="cap-icon">📈</span>
+            <span class="cap-content">
+              <span class="cap-title">覆盖率分析</span>
+              <span class="cap-desc">规则测试覆盖率报告</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h3>快捷查询</h3>
+        <div class="quick-tags">
+          <span class="quick-tag" onclick="sendMessage('YP_XB 是什么？')">YP_XB</span>
+          <span class="quick-tag" onclick="sendMessage('YP_ETZY 是什么？')">YP_ETZY</span>
+          <span class="quick-tag" onclick="sendMessage('FW_XMHC 是什么？')">FW_XMHC</span>
+          <span class="quick-tag" onclick="sendMessage('HC_SP 是什么？')">HC_SP</span>
+          <span class="quick-tag" onclick="sendMessage('查一下支架')">支架</span>
+          <span class="quick-tag" onclick="sendMessage('查一下手术')">手术</span>
+          <span class="quick-tag" onclick="sendMessage('药品限年龄规则')">限年龄</span>
+          <span class="quick-tag" onclick="sendMessage('药品限适应症')">限适应症</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Center Panel: Chat ===== -->
+  <div class="panel-center">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="agent-avatar">🤖</div>
+        <div class="agent-info">
+          <div class="agent-name">审核助手</div>
+          <div class="agent-status">
+            <span class="status-dot"></span>
+            在线
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-sm" onclick="saveHistory()">📝 保存记录</button>
+        <button class="btn btn-ghost btn-sm" onclick="showHelp()">❓ 帮助</button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">💬</div>
+        <div class="empty-title">欢迎使用 AI 医保审核智能体</div>
+        <div class="empty-desc">我是您的医保审核助手，可以帮您查询规则、解释审核结果、检测冲突和分析覆盖率。</div>
+        <div class="empty-actions">
+          <button class="empty-action-btn" onclick="sendMessage('YP_SYZ 是什么规则？')">查询规则示例</button>
+          <button class="empty-action-btn" onclick="sendMessage('查一下阿莫西林')">查询目录示例</button>
+          <button class="empty-action-btn" onclick="sendMessage('检查规则有没有冲突？')">冲突检测示例</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-bar">
+      <div class="input-wrapper">
+        <textarea class="chat-input" id="chatInput" placeholder="输入您的问题，例如：&#10;&#10;• YP_SYZ 规则限哪些适应症？&#10;• 查一下阿莫西林在不在目录里&#10;• 测试为什么失败？&#10;• 最近规则有什么变化？" rows="1"></textarea>
+        <div class="input-actions">
+          <button class="action-btn" onclick="toggleInputSize()" title="切换输入框大小">↕</button>
+          <button class="action-btn" onclick="clearInput()" title="清空输入">✕</button>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          ▶ 发送
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Right Panel: Context ===== -->
+  <div class="panel-right">
+    <div class="panel-header">📊 系统概览</div>
+    <div class="panel-body" style="flex:1;overflow-y:auto;">
+      <div class="context-section">
+        <div class="context-title">📈 规则统计</div>
+        <div class="stat-grid">
+          <div class="stat-card yp">
+            <div class="stat-num" id="statYP">0</div>
+            <div class="stat-label">药品规则</div>
+          </div>
+          <div class="stat-card fw">
+            <div class="stat-num" id="statFW">0</div>
+            <div class="stat-label">项目规则</div>
+          </div>
+          <div class="stat-card hc">
+            <div class="stat-num" id="statHC">0</div>
+            <div class="stat-label">耗材规则</div>
+          </div>
+          <div class="stat-card bz">
+            <div class="stat-num" id="statBZ">0</div>
+            <div class="stat-label">病种规则</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-title">⚡ 快捷帮助</div>
+        <div class="quick-help">
+          <ul>
+            <li><strong>规则查询</strong><br>"YP_SYZ 是什么？"</li>
+            <li><strong>目录查询</strong><br>"查一下阿莫西林"</li>
+            <li><strong>诊断问题</strong><br>"测试为什么失败？"</li>
+            <li><strong>分析报告</strong><br>"覆盖率多少？"</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-title">📜 对话历史</div>
+        <div class="history-list" id="historyList">
+          <div style="text-align:center;padding:12px;color:var(--text-tertiary);font-size:12px;">暂无历史记录</div>
+        </div>
+      </div>
+
+      <div class="context-section">
+        <div class="context-title">🔗 相关链接</div>
+        <div class="quick-help">
+          <ul>
+            <li><a href="rule_sandbox.html" target="_blank" style="color:var(--primary);text-decoration:none;">规则沙箱</a></li>
+            <li><a href="rule_admin.html" target="_blank" style="color:var(--primary);text-decoration:none;">规则管理</a></li>
+            <li><a href="../docs/AI智能体产品说明.md" target="_blank" style="color:var(--primary);text-decoration:none;">产品说明</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8000/api/v1';
+
+let chatHistory = [];
+let isTyping = false;
+
+async function apiGet(path, params = {}) {
+  const url = new URL(API_BASE + path);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) url.searchParams.set(k, v);
+  });
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`API ${resp.status}: ${resp.statusText}`);
+  return resp.json();
+}
+
+async function apiPost(path, body) {
+  const resp = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`API ${resp.status}: ${err}`);
+  }
+  return resp.json();
+}
+
+async function init() {
+  try {
+    setApiStatus('loading', '连接中...');
+    const stats = await apiGet('/sandbox/stats');
+    setApiStatus('online', '已连接');
+    updateStats(stats);
+  } catch (e) {
+    setApiStatus('offline', '连接失败');
+    showToast('无法连接API服务，请确保 api_server.py 已启动 (端口8000)', 'error');
+  }
+  loadHistory();
+}
+
+function setApiStatus(status, text) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + status;
+  document.getElementById('apiStatusText').textContent = text;
+}
+
+function updateStats(stats) {
+  document.getElementById('statRules').textContent = stats.total_rules || 0;
+  document.getElementById('statTests').textContent = stats.total_tests || 193;
+  document.getElementById('statCoverage').textContent = stats.coverage_pct || '0%';
+
+  const pillarArray = stats.pillars || [];
+  const pillarMap = {};
+  pillarArray.forEach(p => {
+    pillarMap[p.pillar] = p.cnt;
+  });
+  document.getElementById('statYP').textContent = pillarMap.YP || 0;
+  document.getElementById('statFW').textContent = pillarMap.FW || 0;
+  document.getElementById('statHC').textContent = pillarMap.HC || 0;
+  document.getElementById('statBZ').textContent = pillarMap.BZ || stats.drg_rules || 0;
+}
+
+function updateHistoryList() {
+  const list = document.getElementById('historyList');
+  if (chatHistory.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-tertiary);font-size:12px;">暂无历史记录</div>';
+    return;
+  }
+  list.innerHTML = chatHistory.slice(-10).reverse().map((h, i) => `
+    <div class="history-item" onclick="restoreHistory(${chatHistory.length - 1 - i})">
+      ${escapeHtml(h.message.slice(0, 40))}${h.message.length > 40 ? '...' : ''}
+    </div>
+  `).join('');
+}
+
+function loadHistory() {
+  try {
+    const stored = localStorage.getItem('audit_agent_history');
+    if (stored) {
+      chatHistory = JSON.parse(stored);
+      updateHistoryList();
+    }
+  } catch (e) {
+    console.warn('Failed to load history:', e);
+  }
+}
+
+function saveHistory() {
+  try {
+    localStorage.setItem('audit_agent_history', JSON.stringify(chatHistory));
+    showToast('对话记录已保存', 'success');
+  } catch (e) {
+    showToast('保存失败', 'error');
+  }
+}
+
+function restoreHistory(index) {
+  const item = chatHistory[index];
+  if (item) {
+    document.getElementById('chatInput').value = item.message;
+    document.getElementById('emptyState').classList.add('hidden');
+    appendMessage(item.message, 'user');
+    appendMessage(item.reply, 'bot', item.source);
+    scrollToBottom();
+  }
+}
+
+function sendMessage(text = null) {
+  if (!text) text = document.getElementById('chatInput').value.trim();
+  if (!text) return;
+
+  document.getElementById('emptyState').classList.add('hidden');
+  appendMessage(text, 'user');
+  document.getElementById('chatInput').value = '';
+  document.getElementById('chatInput').style.height = '36px';
+  scrollToBottom();
+
+  chatHistory.push({ message: text, reply: '', source: '' });
+  updateHistoryList();
+
+  showTyping();
+  isTyping = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  apiPost('/chat', { message: text })
+    .then(resp => {
+      hideTyping();
+      isTyping = false;
+      document.getElementById('sendBtn').disabled = false;
+
+      appendMessage(resp.reply, 'bot', resp.source);
+      chatHistory[chatHistory.length - 1].reply = resp.reply;
+      chatHistory[chatHistory.length - 1].source = resp.source;
+      updateHistoryList();
+      scrollToBottom();
+    })
+    .catch(e => {
+      hideTyping();
+      isTyping = false;
+      document.getElementById('sendBtn').disabled = false;
+
+      appendMessage(`抱歉，我遇到了一个问题：${e.message}`, 'bot', '系统错误');
+      showToast('请求失败: ' + e.message, 'error');
+    });
+}
+
+function appendMessage(text, sender, source = '') {
+  const container = document.getElementById('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `message ${sender}`;
+
+  let contentHtml = formatMessage(text);
+  if (source) {
+    contentHtml += `<div class="msg-source">${source}</div>`;
+  }
+
+  msgDiv.innerHTML = `
+    <div class="msg-avatar ${sender}">${sender === 'user' ? '👤' : '🤖'}</div>
+    <div class="msg-content">${contentHtml}</div>
+  `;
+
+  container.appendChild(msgDiv);
+}
+
+function formatMessage(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px;">$1</code>');
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'message bot';
+  typingDiv.id = 'typingIndicator';
+  typingDiv.innerHTML = `
+    <div class="msg-avatar bot">🤖</div>
+    <div class="typing-indicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span style="font-size:12px;color:var(--text-tertiary);margin-left:6px;">思考中...</span>
+    </div>
+  `;
+  container.appendChild(typingDiv);
+  scrollToBottom();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  const container = document.getElementById('chatMessages');
+  container.scrollTop = container.scrollHeight;
+}
+
+function clearChat() {
+  if (!confirm('确定要清空所有对话记录吗？')) return;
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('emptyState').classList.remove('hidden');
+  chatHistory = [];
+  updateHistoryList();
+  localStorage.removeItem('audit_agent_history');
+}
+
+function clearInput() {
+  document.getElementById('chatInput').value = '';
+  document.getElementById('chatInput').style.height = '36px';
+}
+
+function toggleInputSize() {
+  const input = document.getElementById('chatInput');
+  input.style.height = input.style.height === '36px' ? '120px' : '36px';
+}
+
+function showQuickStart() {
+  document.getElementById('emptyState').classList.add('hidden');
+  appendMessage('你好！我是 AI 医保审核助手。以下是我可以帮助您的功能：\n\n' +
+    '**对话查询**\n' +
+    '• 规则查询: `YP_SYZ 是什么规则？`\n' +
+    '• 目录查询: `查一下阿莫西林`\n' +
+    '• 问题诊断: `测试为什么失败？`\n\n' +
+    '**主动分析**\n' +
+    '• 变更分析: `最近规则有什么变化？`\n' +
+    '• 冲突检测: `检查规则有没有冲突？`\n' +
+    '• 覆盖率分析: `规则测试覆盖了多少？`\n\n' +
+    '试试点击左侧面板的快捷按钮，或直接输入您的问题！', 'bot', '欢迎');
+  scrollToBottom();
+}
+
+function runImpactAnalysis() {
+  document.getElementById('emptyState').classList.add('hidden');
+  appendMessage('最近规则有什么变化？', 'user');
+  scrollToBottom();
+  showTyping();
+
+  apiGet('/agent/impact')
+    .then(resp => {
+      hideTyping();
+      appendMessage(resp.result, 'bot', '影响分析');
+      chatHistory.push({ message: '最近规则有什么变化？', reply: resp.result, source: '影响分析' });
+      updateHistoryList();
+      scrollToBottom();
+    })
+    .catch(e => {
+      hideTyping();
+      appendMessage(`影响分析失败: ${e.message}`, 'bot', '系统错误');
+      showToast('请求失败: ' + e.message, 'error');
+    });
+}
+
+function runConflictDetection() {
+  document.getElementById('emptyState').classList.add('hidden');
+  appendMessage('检查规则有没有冲突？', 'user');
+  scrollToBottom();
+  showTyping();
+
+  apiGet('/agent/conflicts')
+    .then(resp => {
+      hideTyping();
+      appendMessage(resp.result, 'bot', '冲突检测');
+      chatHistory.push({ message: '检查规则有没有冲突？', reply: resp.result, source: '冲突检测' });
+      updateHistoryList();
+      scrollToBottom();
+    })
+    .catch(e => {
+      hideTyping();
+      appendMessage(`冲突检测失败: ${e.message}`, 'bot', '系统错误');
+      showToast('请求失败: ' + e.message, 'error');
+    });
+}
+
+function runCoverageAnalysis() {
+  document.getElementById('emptyState').classList.add('hidden');
+  appendMessage('规则测试覆盖了多少？', 'user');
+  scrollToBottom();
+  showTyping();
+
+  apiGet('/agent/coverage')
+    .then(resp => {
+      hideTyping();
+      appendMessage(resp.result, 'bot', '覆盖率分析');
+      chatHistory.push({ message: '规则测试覆盖了多少？', reply: resp.result, source: '覆盖率分析' });
+      updateHistoryList();
+      scrollToBottom();
+    })
+    .catch(e => {
+      hideTyping();
+      appendMessage(`覆盖率分析失败: ${e.message}`, 'bot', '系统错误');
+      showToast('请求失败: ' + e.message, 'error');
+    });
+}
+
+function showHelp() {
+  appendMessage('**AI 医保审核智能体 — 使用帮助**\n\n' +
+    '**💬 对话查询**\n' +
+    '• `规则编码 是什么？` — 查询规则详情\n' +
+    '• `查一下 药品名称` — 查询目录\n' +
+    '• `为什么被拦截？` — 解释审核结果\n' +
+    '• `测试为什么失败？` — 诊断测试问题\n\n' +
+    '**📊 主动分析**\n' +
+    '• 点击左侧面板「变更影响分析」按钮\n' +
+    '• 点击左侧面板「冲突检测」按钮\n' +
+    '• 点击左侧面板「覆盖率分析」按钮\n\n' +
+    '**⚡ 快捷操作**\n' +
+    '• 左侧面板点击能力卡片快速查询\n' +
+    '• 快捷标签一键查询常见规则\n' +
+    '• 右侧面板查看系统统计和历史记录\n\n' +
+    '**🔗 相关链接**\n' +
+    '• 规则沙箱 — 测试和验证规则\n' +
+    '• 规则管理 — 管理规则配置\n' +
+    '• 产品说明 — 详细文档', 'bot', '帮助中心');
+  scrollToBottom();
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${msg}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+document.getElementById('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+document.getElementById('chatInput').addEventListener('input', (e) => {
+  e.target.style.height = 'auto';
+  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+});
+
+init();
+</script>
+</body>
+</html>

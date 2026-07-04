@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>医保审核引擎 - Dashboard UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="../../components.css">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+<style>
+.uikit-shell{width:100%;max-width:1184px;margin:0 auto;overflow:hidden;display:grid;grid-template-columns:var(--uikit-sidebar-w,220px) minmax(0,1fr);gap:0;min-height:600px;font-family:var(--font-family-base);color:var(--color-foreground);background:var(--background)}
+.uikit-sidebar,.uikit-main,.uikit-toolbar{min-width:0}
+.uikit-sidebar{overflow:hidden;max-width:100%}
+[data-component]{min-width:0;max-width:100%;overflow:hidden}
+.uikit-toolbar{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-border);background:var(--color-surface)}
+.uikit-responsive-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)}
+.uikit-table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.uikit-truncate{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uikit-nowrap{white-space:nowrap;flex-shrink:0}
+.uikit-action-cell{display:flex;align-items:center;gap:8px;min-width:0;max-width:160px;overflow:hidden}
+.uikit-action{min-width:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page-content{padding:var(--space-5)}
+.section-gap{margin-top:var(--space-5)}
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)}
+.accent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
+.filter-bar{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-4)}
+.page-title{font-family:var(--font-heading);font-size:var(--font-size-h3);font-weight:var(--font-weight-h3);color:var(--color-on-surface);margin:0;word-break:keep-all;overflow-wrap:break-word}
+.page-subtitle{font-size:var(--font-size-caption);color:var(--color-on-surface-variant);margin:var(--space-1) 0 0 0}
+.table-title{font-family:var(--font-heading);font-size:var(--font-size-h4);font-weight:var(--font-weight-h4);color:var(--color-on-surface);margin-bottom:var(--space-3);word-break:keep-all}
+.search-box{flex:1;max-width:320px;min-width:180px}
+.tab-bar{display:flex;gap:var(--space-1);border-bottom:1px solid var(--color-border);padding:0 var(--space-5)}
+.tab-item{padding:var(--space-3) var(--space-4);font-size:var(--font-size-body);color:var(--color-on-surface-variant);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.tab-item:hover{color:var(--color-on-surface)}
+.tab-item.active{color:var(--color-primary);border-bottom-color:var(--color-primary);font-weight:var(--font-weight-lead)}
+.card-footer-actions{display:flex;align-items:center;justify-content:space-between}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:var(--space-3)}
+.bar{flex:1;border-radius:3px 3px 0 0;transition:opacity .15s}
+.bar:hover{opacity:.8}
+.barH20{height:20%}.barH35{height:35%}.barH45{height:45%}.barH55{height:55%}.barH65{height:65%}.barH75{height:75%}.barH85{height:85%}.barH95{height:95%}.barH100{height:100%}
+.icon-sm{width:var(--size-icon-sm);height:var(--size-icon-sm)}
+.icon-md{width:var(--size-icon-md);height:var(--size-icon-md)}
+.icon-lg{width:var(--size-icon-lg);height:var(--size-icon-lg)}
+.cell-mono{font-family:var(--font-mono);font-size:var(--font-size-mono);font-variant-numeric:tabular-nums}
+.tabular{font-variant-numeric:tabular-nums}
+.toolbar-right{margin-left:auto;display:flex;align-items:center;gap:var(--space-3)}
+@media(max-width:900px){.uikit-shell{grid-template-columns:minmax(0,1fr)}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.accent-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.uikit-toolbar{flex-direction:column;align-items:stretch}.stat-grid{grid-template-columns:minmax(0,1fr)}.filter-bar{flex-direction:column;align-items:stretch}.search-box{max-width:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback } = React;
+
+/* ── Mock Data ─────────────────────────────────────── */
+const navItems = [
+  { key:'workbench', label:'工作台', icon:'layout-dashboard' },
+  { key:'rules', label:'规则审核', icon:'shield-check' },
+  { key:'sandbox', label:'规则沙箱', icon:'flask-conical' },
+  { key:'analytics', label:'智能分析', icon:'brain' },
+  { key:'ai', label:'AI 助手', icon:'bot' },
+  { key:'reports', label:'审核报告', icon:'file-bar-chart' },
+  { key:'settings', label:'系统设置', icon:'settings' },
+];
+
+const statCards = [
+  { label:'规则总数', value:'1,280', trend:'+12', icon:'list-checks', color:'primary' },
+  { label:'活跃规则', value:'1,156', trend:'+8', icon:'activity', color:'success' },
+  { label:'审核通过率', value:'94.7%', trend:'+2.3', icon:'check-circle-2', color:'success' },
+  { label:'异常规则', value:'42', trend:'+5', icon:'alert-triangle', color:'warning' },
+];
+
+const tableRows = [
+  { code:'DRG-001', name:'住院费用超额审核', category:'费用审核', stage:'事前审核', severity:'error', status:'active' },
+  { code:'DRG-023', name:'药品目录合规校验', category:'药品审核', stage:'事中审核', severity:'success', status:'active' },
+  { code:'DRG-045', name:'诊断编码匹配检查', category:'诊断审核', stage:'事后审核', severity:'warning', status:'pending' },
+  { code:'DRG-067', name:'重复就诊异常检测', category:'行为审核', stage:'事中审核', severity:'info', status:'active' },
+  { code:'DRG-089', name:'耗材使用合理性评估', category:'费用审核', stage:'事后审核', severity:'error', status:'disabled' },
+  { code:'DRG-102', name:'门诊特殊病种核验', category:'诊断审核', stage:'事前审核', severity:'success', status:'active' },
+];
+
+const accentCards = [
+  { title:'规则覆盖率', desc:'当前规则覆盖率已达到 87.3%，超出目标阈值，建议继续保持审核频次', type:'success' },
+  { title:'批量审核完成', desc:'本月批量审核任务已全部完成，无待处理项', type:'primary' },
+  { title:'规则即将到期', desc:'3 条规则将于下周到期，请及时更新配置', type:'warning' },
+];
+
+const severityMap = { error:'违规', success:'合规', warning:'可疑', info:'信息' };
+const statusMap = { active:'启用', pending:'待审', disabled:'停用' };
+const stageMap = { '事前审核':'事前审核', '事中审核':'事中审核', '事后审核':'事后审核' };
+
+const chartData = [
+  {month:'1月',v:65},{month:'2月',v:72},{month:'3月',v:58},{month:'4月',v:80},{month:'5月',v:85},
+  {month:'6月',v:92},{month:'7月',v:78},{month:'8月',v:88},{month:'9月',v:95},{month:'10月',v:90},
+  {month:'11月',v:82},{month:'12月',v:96},
+];
+
+/* ── Components ────────────────────────────────────── */
+function Sidebar({ activeKey, onNav }) {
+  return (
+    <aside className="uikit-sidebar" style={{height:'100%'}}>
+      <nav className="sidebar" data-component="sidebar" style={{height:'100%',borderRadius:0}}>
+        <div className="sidebar-logo">
+          <i data-lucide="shield-check" style={{width:20,height:20,display:'inline-block',marginRight:8,verticalAlign:'middle'}}></i>
+          医保审核引擎
+        </div>
+        <div className="sidebar-nav">
+          {navItems.map(item => (
+            <a key={item.key}
+              className={`sidebar-nav-item${activeKey === item.key ? ' active' : ''}`}
+              onClick={() => onNav(item.key)}
+            >
+              <i data-lucide={item.icon} style={{width:var_icon_md(),height:var_icon_md(),display:'inline-block',marginRight:10,flexShrink:0}}></i>
+              <span className="uikit-truncate">{item.label}</span>
+            </a>
+          ))}
+        </div>
+        <div className="sidebar-footer">
+          <span className="uikit-truncate">v2.4.1</span>
+        </div>
+      </nav>
+    </aside>
+  );
+}
+
+function var_icon_md(){ return '20px'; }
+function var_icon_sm(){ return '16px'; }
+function var_icon_lg(){ return '24px'; }
+
+function StatCard({ label, value, trend, icon, color }) {
+  return (
+    <div className="card-stat" data-component="card">
+      <div className={`stat-icon ${color}`}>
+        <i data-lucide={icon} style={{width:var_icon_lg(),height:var_icon_lg(),display:'block'}}></i>
+      </div>
+      <div className="stat-info">
+        <div className="stat-value tabular uikit-truncate">{value}</div>
+        <div className="stat-label uikit-truncate">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function AccentCard({ title, desc, type }) {
+  const cls = type === 'success' ? 'accent-success' : type === 'warning' ? 'accent-warning' : '';
+  return (
+    <div className={`card-accent ${cls}`} data-component="card">
+      <div className="card-accent-title uikit-truncate">{title}</div>
+      <div className="card-accent-desc" style={{display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{desc}</div>
+    </div>
+  );
+}
+
+function Badge({ type, children }) {
+  return <span className={`badge badge-${type}`} data-component="badge">{children}</span>;
+}
+
+function AuditTable() {
+  return (
+    <div data-component="table">
+      <div className="uikit-table-wrap">
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>规则编码</th>
+                <th>规则名称</th>
+                <th>分类</th>
+                <th>审核阶段</th>
+                <th>严重等级</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableRows.map((r, i) => (
+                <tr key={i}>
+                  <td className="cell-mono">{r.code}</td>
+                  <td className="uikit-truncate" style={{maxWidth:160}}>{r.name}</td>
+                  <td><span className="uikit-truncate">{r.category}</span></td>
+                  <td className="uikit-nowrap">{r.stage}</td>
+                  <td><Badge type={r.severity}>{severityMap[r.severity]}</Badge></td>
+                  <td>
+                    {r.status === 'active' ? <Badge type="success">{statusMap[r.status}</Badge> :
+                     r.status === 'pending' ? <Badge type="warning">{statusMap[r.status}</Badge> :
+                     <Badge type="muted">{statusMap[r.status}</Badge>}
+                  </td>
+                  <td>
+                    <div className="uikit-action-cell">
+                      <button className="btn ghost sm" style={{fontSize:12,padding:'4px 10px',height:28,minWidth:'auto'}}>查看</button>
+                      <i data-lucide="more-horizontal" style={{width:16,height:16,display:'inline-block',color:'var(--color-on-surface-variant)',cursor:'pointer',flexShrink:0}}></i>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniChart() {
+  return (
+    <div data-component="card" className="card">
+      <div className="card-header">
+        <span className="card-title">审核趋势</span>
+        <span className="card-meta">2024年度</span>
+      </div>
+      <div className="chart-bars">
+        {chartData.map((d, i) => (
+          <div key={i}
+            className={`bar barH${Math.round(d.v)}`}
+            style={{background: i === chartData.length - 1 ? 'var(--med-teal-500)' : 'var(--med-teal-200)' }}
+            title={`${d.month}: ${d.v}%`}
+          ></div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Views ─────────────────────────────────────────── */
+function WorkbenchView() {
+  return (
+    <div className="page-content">
+      <div style={{marginBottom:var_sp5()}}>
+        <h1 className="page-title">工作台</h1>
+        <p className="page-subtitle">本季度共完成 1,280 条审核规则的执行分析</p>
+      </div>
+      <div className="stat-grid">
+        {statCards.map((c, i) => <StatCard key={i} {...c} />)}
+      </div>
+      <div className="section-gap">
+        <h3 className="table-title">审核动态</h3>
+        <div className="accent-grid">
+          {accentCards.map((c, i) => <AccentCard key={i} {...c} />)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function var_sp5(){ return 'var(--space-5)'; }
+function var_sp4(){ return 'var(--space-4)'; }
+function var_sp3(){ return 'var(--space-3)'; }
+
+function RulesView() {
+  return (
+    <div className="page-content">
+      <div style={{marginBottom:var_sp5(),display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:var_sp3(),flexWrap:'wrap'}}>
+        <div style={{minWidth:0}}>
+          <h1 className="page-title">规则审核</h1>
+          <p className="page-subtitle">管理并监控所有审核规则的执行状态</p>
+        </div>
+        <button className="btn primary md" data-component="button">
+          <i data-lucide="plus" style={{width:16,height:16,display:'inline-block'}}></i>
+          新建规则
+        </button>
+      </div>
+      <div className="filter-bar">
+        <div className="input-group search-box" data-component="input">
+          <div className="input-wrapper">
+            <i data-lucide="search" className="search-icon"></i>
+            <input className="input-field input-search" type="text" placeholder="搜索规则编码或名称..." />
+          </div>
+        </div>
+        <button className="btn secondary sm" data-component="button">
+          <i data-lucide="filter" style={{width:14,height:14,display:'inline-block'}}></i>
+          筛选
+        </button>
+        <button className="btn ghost sm" data-component="button" disabled>
+          <i data-lucide="download" style={{width:14,height:14,display:'inline-block'}}></i>
+          导出数据
+        </button>
+      </div>
+      <AuditTable />
+    </div>
+  );
+}
+
+function AnalyticsView() {
+  return (
+    <div className="page-content">
+      <div style={{marginBottom:var_sp5()}}>
+        <h1 className="page-title">智能分析</h1>
+        <p className="page-subtitle">基于 AI 的审核规则覆盖率与趋势分析</p>
+      </div>
+      <div className="stat-grid" style={{marginBottom:var_sp5()}}>
+        <StatCard label="覆盖率" value="87.3%" trend="+3.1" icon="target" color="primary" />
+        <StatCard label="命中次数" value="24,568" trend:"+1.2k" icon="crosshair" color="success" />
+        <StatCard label="误报率" value="2.1%" trend="-0.4" icon="shield-alert" color="warning" />
+        <StatCard label="处理时长" value="1.2s" trend="-0.3" icon="timer" color="primary" />
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(0,1fr)',gap:var_sp4()}}>
+        <MiniChart />
+        <div data-component="card" className="card">
+          <div className="card-header">
+            <span className="card-title">规则命中分布</span>
+            <span className="card-meta">按阶段</span>
+          </div>
+          <div className="card-body" style={{display:'flex',flexDirection:'column',gap:var_sp3()}}>
+            {[
+              {stage:'事前审核',pct:45,color:'var(--med-teal-500)'},
+              {stage:'事中审核',pct:35,color:'var(--med-cyan-500)'},
+              {stage:'事后审核',pct:20,color:'var(--med-blue-500)'},
+            ].map((item, i) => (
+              <div key={i} style={{minWidth:0}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                  <span className="uikit-truncate" style={{fontSize:'var(--font-size-caption)',color:'var(--color-on-surface-variant)'}}>{item.stage}</span>
+                  <span className="uikit-nowrap tabular" style={{fontSize:'var(--font-size-caption)',color:'var(--color-on-surface)'}}>{item.pct}%</span>
+                </div>
+                <div style={{height:8,borderRadius:'var(--radius-full)',background:'var(--color-surface-container-high)',overflow:'hidden'}}>
+                  <div style={{width:`${item.pct}%`,height:'100%',borderRadius:'var(--radius-full)',background:item.color,transition:'width .3s'}}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="card-footer">
+            <span className="card-action">查看详情</span>
+          </div>
+        </div>
+      </div>
+      <div className="section-gap">
+        <h3 className="table-title">近期异常规则</h3>
+        <AuditTable />
+      </div>
+    </div>
+  );
+}
+
+/* ── App ───────────────────────────────────────────── */
+function App() {
+  const [activeKey, setActiveKey] = useState('workbench');
+
+  const renderView = useCallback(() => {
+    switch(activeKey) {
+      case 'rules': return <RulesView />;
+      case 'analytics': return <AnalyticsView />;
+      default: return <WorkbenchView />;
+    }
+  }, [activeKey]);
+
+  return (
+    <div className="uikit-shell" data-layout-guard="uikit-v1" style={{'--uikit-sidebar-w':'240px'}}>
+      <Sidebar activeKey={activeKey} onNav={setActiveKey} />
+      <main className="uikit-main">
+        <div className="uikit-toolbar">
+          <span className="page-title uikit-truncate" style={{fontSize:'var(--font-size-h4)',fontWeight:'var(--font-weight-h4)',margin:0}}>
+            {navItems.find(n => n.key === activeKey)?.label || '工作台'}
+          </span>
+          <div className="toolbar-right">
+            <div className="input-group" data-component="input" style={{minWidth:140,flexShrink:1}}>
+              <div className="input-wrapper">
+                <i data-lucide="search" className="search-icon"></i>
+                <input className="input-field input-search" type="text" placeholder="全局搜索..." style={{height:36,fontSize:'var(--font-size-caption)'}} />
+              </div>
+            </div>
+            <button className="btn ghost sm" data-component="button" style={{padding:'6px 8px',minWidth:'auto'}}>
+              <i data-lucide="bell" style={{width:16,height:16,display:'inline-block'}}></i>
+            </button>
+            <button className="btn ghost sm" data-component="button" style={{padding:'6px 8px',minWidth:'auto'}}>
+              <i data-lucide="user" style={{width:16,height:16,display:'inline-block'}}></i>
+            </button>
+          </div>
+        </div>
+        {renderView()}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

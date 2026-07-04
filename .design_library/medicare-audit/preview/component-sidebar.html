@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sidebar – Medicare Audit</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+/* Page scaffold — NOT extracted */
+body { margin: 0; padding: var(--space-3); background: var(--color-background); font-family: var(--font-family-base); color: var(--color-on-surface); }
+.specimen { width: 100%; }
+.header { font-size: var(--font-size-eyebrow); font-weight: var(--font-weight-eyebrow); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: var(--space-4); }
+.stage { display: flex; flex-direction: column; gap: var(--space-4); }
+.story { display: flex; flex-direction: column; gap: var(--space-2); }
+.story-label { font-size: var(--font-size-caption); color: var(--muted-foreground); font-weight: var(--font-weight-caption); }
+.rail { display: flex; gap: var(--space-4); align-items: flex-start; flex-wrap: wrap; }
+
+/* @component-css-start */
+/* Component definitions — extracted to components.css by deterministic script */
+.sidebar { width: var(--sidebar-width); height: 480px; background: var(--med-gray-900); display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden; flex-shrink: 0; }
+.sidebar-logo { padding: var(--space-4) var(--space-5); color: #ffffff; font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); border-bottom: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+.sidebar-nav { flex: 1; overflow-y: auto; padding: var(--space-3) 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.sidebar-nav-item { display: flex; align-items: center; padding: var(--space-3) var(--space-5); color: rgba(255,255,255,.7); font-size: var(--font-size-body); cursor: pointer; transition: background .15s, color .15s, border-color .15s; border-left: 3px solid transparent; white-space: nowrap; text-decoration: none; }
+.sidebar-nav-item:hover { background: var(--interactive-hover); color: #ffffff; }
+.sidebar-nav-item.active { background: var(--interactive-focus); color: #ffffff; border-left-color: var(--primary); font-weight: var(--font-weight-lead); }
+.sidebar-footer { padding: var(--space-3) var(--space-5); border-top: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.5); font-size: var(--font-size-caption); white-space: nowrap; }
+/* @component-css-end */
+</style>
+</head>
+<body>
+<div class="specimen">
+  <div class="header">Sidebar</div>
+  <div class="stage">
+    <div class="story">
+      <span class="story-label">Default</span>
+      <div class="rail">
+        <nav class="sidebar">
+          <div class="sidebar-logo">医保审核引擎</div>
+          <div class="sidebar-nav">
+            <a class="sidebar-nav-item active">工作台</a>
+            <a class="sidebar-nav-item">规则审核</a>
+            <a class="sidebar-nav-item">规则沙箱</a>
+            <a class="sidebar-nav-item">智能分析</a>
+            <a class="sidebar-nav-item">AI 助手</a>
+            <a class="sidebar-nav-item">审核报告</a>
+            <a class="sidebar-nav-item">系统设置</a>
+          </div>
+          <div class="sidebar-footer">Medicare Audit v1.0</div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

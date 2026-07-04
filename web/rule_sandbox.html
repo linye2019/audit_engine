@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医保规则沙箱 — 规则验证与测试环境</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-light: #e8f0fe;
+    --danger: #d93025;
+    --danger-light: #fce8e6;
+    --warning: #f9ab00;
+    --warning-light: #fef7e0;
+    --success: #1e8e3e;
+    --success-light: #e6f4ea;
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --border: #dadce0;
+    --text: #202124;
+    --text-secondary: #5f6368;
+    --text-tertiary: #80868b;
+    --shadow: 0 1px 3px rgba(60,64,67,0.15), 0 1px 2px rgba(60,64,67,0.1);
+    --shadow-lg: 0 4px 12px rgba(60,64,67,0.15);
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --mono: "SF Mono", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ===== Top Bar ===== */
+  .topbar {
+    background: linear-gradient(135deg, #1a56c4, #1a73e8);
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+  .topbar-title {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-title .icon { font-size: 24px; }
+  .topbar-stats {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+  }
+  .topbar-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.95;
+  }
+  .topbar-stats .stat strong {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    font-size: 12px;
+  }
+  .api-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34a853;
+  }
+  .api-status.offline .dot { background: #d93025; }
+  .api-status.loading .dot { background: #f9ab00; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ===== Main Layout ===== */
+  .main {
+    display: flex;
+    height: calc(100vh - 56px);
+    gap: 0;
+  }
+  .panel {
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-left { width: 320px; border-right: 1px solid var(--border); }
+  .panel-center { flex: 1; min-width: 0; }
+  .panel-right { width: 420px; border-left: 1px solid var(--border); }
+
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .panel-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-header .badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  /* ===== Rule Browser (Left Panel) ===== */
+  .search-box {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--font);
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+  }
+  .search-box .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .filter-row select {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--font);
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .filter-row select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .template-section {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .template-section h3 {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .template-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .template-btn {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: var(--font);
+    text-align: left;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .template-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .template-btn.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.25);
+  }
+  .template-btn.active .tname {
+    color: var(--primary);
+  }
+  .template-btn .tname {
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+  }
+  .template-btn .tcount {
+    color: var(--text-tertiary);
+    font-size: 11px;
+  }
+
+  .rule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rule-item {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #fff;
+  }
+  .rule-item:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .rule-item.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+  }
+  .rule-item .rcode {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .rule-item .rname {
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .rule-item .rcat {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+  .rule-item .rpillar {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .pillar-drug { background: #e8f0fe; color: #1a73e8; }
+  .pillar-project { background: #e6f4ea; color: #1e8e3e; }
+  .pillar-consumable { background: #fef7e0; color: #f29900; }
+  .pillar-drg { background: #fce8e6; color: #d93025; }
+
+  .load-more {
+    text-align: center;
+    padding: 10px;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+  .load-more:hover { background: var(--primary-light); }
+
+  /* ===== Test Builder (Center Panel) ===== */
+  .builder-section {
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title .section-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .form-group label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .form-group input,
+  .form-group select {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--font);
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.1);
+  }
+  .form-group input[type="date"] {
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .line-items {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .line-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 60px 70px 70px 32px;
+    gap: 6px;
+    padding: 8px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+  }
+  .line-item:last-child { border-bottom: none; }
+  .line-item.header {
+    background: #f1f3f4;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+  .line-item input,
+  .line-item select {
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: var(--font);
+    width: 100%;
+  }
+  .line-item input:focus { outline: none; border-color: var(--primary); }
+  .line-item .line-del {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .line-item .line-del:hover { background: var(--danger-light); }
+  .line-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: var(--font);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+  .btn-outline:hover { background: var(--primary-light); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); }
+  .btn-ghost:hover { background: #f1f3f4; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #b3261e; }
+
+  .run-bar {
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .run-bar .stage-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .run-bar .stage-select select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--font);
+  }
+  .run-btn {
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .selected-rule-bar {
+    padding: 8px 12px;
+    background: var(--primary-light);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .selected-rule-bar .sr-code {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .selected-rule-bar .sr-name { color: var(--text); }
+
+  /* ===== Conditions DSL Viewer ===== */
+  .conditions-viewer {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    overflow-x: auto;
+    margin-top: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .conditions-viewer .json-key { color: #9cdcfe; }
+  .conditions-viewer .json-string { color: #ce9178; }
+  .conditions-viewer .json-number { color: #b5cea8; }
+  .conditions-viewer .json-bool { color: #569cd6; }
+
+  /* ===== Results Panel (Right) ===== */
+  .result-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-card {
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid var(--border);
+  }
+  .result-card .rc-num {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .result-card .rc-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .result-card.violation .rc-num { color: var(--danger); }
+  .result-card.suspicious .rc-num { color: var(--warning); }
+  .result-card.pass .rc-num { color: var(--success); }
+  .result-card.time .rc-num { color: var(--primary); font-size: 18px; }
+
+  .result-list {
+    padding: 8px;
+  }
+  .result-item {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .result-item.violation { border-left: 4px solid var(--danger); }
+  .result-item.suspicious { border-left: 4px solid var(--warning); }
+  .result-item.info { border-left: 4px solid var(--primary); }
+
+  .result-item-header {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .result-item-header:hover { background: #f8f9fa; }
+  .result-item-header .ri-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-item-header .ri-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .result-item-header .ri-sev {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .ri-sev.violation { background: var(--danger-light); color: var(--danger); }
+  .ri-sev.suspicious { background: var(--warning-light); color: var(--warning); }
+  .ri-sev.info { background: var(--primary-light); color: var(--primary); }
+  .result-item-header .ri-action {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .result-item-header .ri-expand {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    transition: transform 0.2s;
+  }
+  .result-item.expanded .ri-expand { transform: rotate(90deg); }
+
+  .result-item-body {
+    display: none;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: #fafafa;
+  }
+  .result-item.expanded .result-item-body { display: block; }
+  .result-item-body .rib-section {
+    margin-bottom: 10px;
+  }
+  .result-item-body .rib-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .result-item-body .rib-content {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .result-item-body .rib-facts {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    overflow-x: auto;
+  }
+  .result-item-body .rib-reasoning {
+    background: #fff;
+    border-left: 3px solid var(--primary);
+    padding: 8px 10px;
+    border-radius: 0 4px 4px 0;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .result-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-tertiary);
+  }
+  .result-empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .result-empty .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .result-empty .desc { font-size: 12px; }
+
+  .pass-banner {
+    margin: 8px;
+    padding: 12px;
+    background: var(--success-light);
+    border: 1px solid var(--success);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--success);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+  /* ===== Loading ===== */
+  .loading-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay .text { font-size: 13px; color: var(--text-secondary); }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--primary); }
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Top Bar ===== -->
+<div class="topbar">
+  <div class="topbar-title">
+    <span class="icon">🔬</span>
+    <span>医保规则沙箱</span>
+    <span style="font-size:12px;opacity:0.7;font-weight:400;">规则验证与测试环境</span>
+  </div>
+  <div class="topbar-stats" id="topStats">
+    <div class="stat"><strong id="statTotal">-</strong> 活跃规则</div>
+    <div class="stat"><strong id="statDrg">-</strong> DRG规则</div>
+    <div class="stat"><strong id="statCat">-</strong> 规则类别</div>
+  </div>
+  <div class="api-status" id="apiStatus">
+    <span class="dot"></span>
+    <span id="apiStatusText">连接中...</span>
+  </div>
+</div>
+
+<!-- ===== Main Layout ===== -->
+<div class="main">
+
+  <!-- ===== Left Panel: Rule Browser ===== -->
+  <div class="panel panel-left">
+    <div class="panel-header">
+      <h2>📋 规则浏览 <span class="badge" id="ruleCount">0</span></h2>
+    </div>
+    <div class="panel-body">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索规则编码/名称/类别...">
+      </div>
+      <div class="filter-row">
+        <select id="filterPillar">
+          <option value="">全部柱别</option>
+          <option value="YP">药品 YP</option>
+          <option value="FW">项目 FW</option>
+          <option value="HC">耗材 HC</option>
+          <option value="herbal">中药 ZY</option>
+        </select>
+        <select id="filterStage">
+          <option value="">全部阶段</option>
+          <option value="pre_check">事前提醒</option>
+          <option value="end_check">事中控制</option>
+          <option value="post_audit">事后监管</option>
+        </select>
+      </div>
+
+      <div class="template-section">
+        <h3>⚡ 快速测试模板</h3>
+        <div class="template-grid" id="templateGrid"></div>
+      </div>
+
+      <div class="rule-list" id="ruleList"></div>
+      <div class="load-more" id="loadMore" style="display:none;" onclick="loadMoreRules()">加载更多 ↓</div>
+    </div>
+  </div>
+
+  <!-- ===== Center Panel: Test Builder ===== -->
+  <div class="panel panel-center" style="position:relative;">
+    <div class="panel-header">
+      <h2>🧪 测试用例构建</h2>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="clearBuilder()">清空</button>
+        <button class="btn btn-outline btn-sm" onclick="exportTestCase()">导出JSON</button>
+      </div>
+    </div>
+
+    <div class="selected-rule-bar" id="selectedRuleBar" style="display:none;">
+      <div>
+        <span class="sr-code" id="srCode"></span>
+        <span class="sr-name" id="srName"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="clearSelectedRule()">取消选择</button>
+    </div>
+
+    <div class="panel-body" id="builderBody">
+      <!-- 患者与就诊信息 -->
+      <div class="builder-section">
+        <div class="section-title">👤 患者与就诊信息</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>性别</label>
+            <select id="f_gend">
+              <option value="1">男 (1)</option>
+              <option value="2">女 (2)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>出生日期</label>
+            <input type="date" id="f_brdy" value="1980-01-01">
+          </div>
+          <div class="form-group">
+            <label>医疗类别</label>
+            <select id="f_med_type">
+              <option value="11">门诊 (11)</option>
+              <option value="13">急诊 (13)</option>
+              <option value="14">门慢特 (14)</option>
+              <option value="21">住院 (21)</option>
+              <option value="28">日间手术 (28)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>医院等级</label>
+            <select id="f_hosp_lv">
+              <option value="">不指定</option>
+              <option value="2">三级 (2)</option>
+              <option value="5">二级 (5)</option>
+              <option value="8">一级 (8)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>险种</label>
+            <select id="f_insutype">
+              <option value="">不指定</option>
+              <option value="310">职工医保 (310)</option>
+              <option value="390">居民医保 (390)</option>
+              <option value="410">工伤保险</option>
+              <option value="510">生育保险</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>科室</label>
+            <input type="text" id="f_dept" placeholder="如: 内科">
+          </div>
+        </div>
+      </div>
+
+      <!-- 诊断信息 -->
+      <div class="builder-section">
+        <div class="section-title">🏥 诊断信息</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>主诊断编码 (ICD-10)</label>
+            <input type="text" id="f_main_diag_code" placeholder="如: K85 (急性胰腺炎)">
+          </div>
+          <div class="form-group">
+            <label>主诊断名称</label>
+            <input type="text" id="f_main_diag_name" placeholder="如: 急性胰腺炎">
+          </div>
+          <div class="form-group">
+            <label>次诊断编码 (逗号分隔)</label>
+            <input type="text" id="f_diag_codes" placeholder="如: E11, N18">
+          </div>
+          <div class="form-group">
+            <label>主手术编码 (ICD-9)</label>
+            <input type="text" id="f_main_oprn_code" placeholder="如: 51.23">
+          </div>
+        </div>
+      </div>
+
+      <!-- DRG/住院信息 -->
+      <div class="builder-section">
+        <div class="section-title">📊 DRG与住院信息 (住院场景填写)</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>DRG病组编码</label>
+            <input type="text" id="f_drg_codg" placeholder="如: AH19">
+          </div>
+          <div class="form-group">
+            <label>DRG权重</label>
+            <input type="number" id="f_drg_wt" value="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>DRG支付额</label>
+            <input type="number" id="f_drg_pay" value="0">
+          </div>
+          <div class="form-group">
+            <label>住院天数</label>
+            <input type="number" id="f_inhosp_days" value="0">
+          </div>
+          <div class="form-group">
+            <label>入院日期</label>
+            <input type="date" id="f_adm_date">
+          </div>
+          <div class="form-group">
+            <label>出院日期</label>
+            <input type="date" id="f_dscg_date">
+          </div>
+          <div class="form-group">
+            <label>离院方式</label>
+            <select id="f_dscg_way">
+              <option value="">不指定</option>
+              <option value="1">医嘱离院 (1)</option>
+              <option value="5">死亡 (5)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>费用总额</label>
+            <input type="number" id="f_medfee_sumamt" value="0">
+          </div>
+          <div class="form-group">
+            <label>基金支付</label>
+            <input type="number" id="f_fund_pay_sumamt" value="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- 费用明细行 -->
+      <div class="builder-section">
+        <div class="section-title">
+          💊 费用明细行
+          <div class="section-actions">
+            <button class="btn btn-outline btn-sm" onclick="addLine()">+ 添加行</button>
+          </div>
+        </div>
+        <div class="line-items" id="lineItems">
+          <div class="line-item header">
+            <div>类别</div>
+            <div>项目名称</div>
+            <div>目录编码</div>
+            <div>数量</div>
+            <div>单价</div>
+            <div>金额</div>
+            <div></div>
+          </div>
+          <div class="line-empty" id="lineEmpty">
+            点击"+ 添加行"添加费用明细<br>
+            <span style="font-size:11px;">支持药品/项目/耗材/中药饮片</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="run-bar">
+      <div class="stage-select">
+        <label style="font-size:12px;color:var(--text-secondary);">审核阶段:</label>
+        <select id="f_stage">
+          <option value="pre_check">事前提醒 (pre_check)</option>
+          <option value="end_check">事中控制 (end_check)</option>
+          <option value="post_audit" selected>事后监管 (post_audit)</option>
+        </select>
+      </div>
+      <button class="btn btn-primary run-btn" onclick="runTest()">
+        ▶ 执行测试
+      </button>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="text" id="loadingText">正在执行审核...</div>
+    </div>
+  </div>
+
+  <!-- ===== Right Panel: Results ===== -->
+  <div class="panel panel-right">
+    <div class="panel-header">
+      <h2>📊 测试结果 <span class="badge" id="resultCount" style="background:var(--text-tertiary);">0</span></h2>
+      <button class="btn btn-ghost btn-sm" onclick="clearResults()" id="clearResultsBtn" style="display:none;">清空</button>
+    </div>
+
+    <div class="panel-body" id="resultsBody">
+      <div class="result-empty" id="resultEmpty">
+        <div class="icon">🧪</div>
+        <div class="title">等待测试执行</div>
+        <div class="desc">构建测试用例后点击"执行测试"按钮<br>或在左侧选择快速模板一键测试</div>
+      </div>
+
+      <div id="resultContent" style="display:none;">
+        <div class="result-summary" id="resultSummary"></div>
+        <div class="result-list" id="resultList"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================================
+// 配置
+// ============================================================================
+const API_BASE = 'http://localhost:8000/api/v1';
+
+let currentRules = [];
+let ruleOffset = 0;
+const RENDER_BATCH = 100;  // 每次渲染100条，滚动加载更多
+let renderedCount = 0;
+let selectedRuleCode = '';
+let templates = [];
+
+// ============================================================================
+// API 调用
+// ============================================================================
+async function apiGet(path, params = {}) {
+  const url = new URL(API_BASE + path);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) url.searchParams.set(k, v);
+  });
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`API ${resp.status}: ${resp.statusText}`);
+  return resp.json();
+}
+
+async function apiPost(path, body) {
+  const resp = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`API ${resp.status}: ${err}`);
+  }
+  return resp.json();
+}
+
+// ============================================================================
+// 初始化
+// ============================================================================
+async function init() {
+  try {
+    setApiStatus('loading', '连接中...');
+    const [stats, templatesResp] = await Promise.all([
+      apiGet('/sandbox/stats'),
+      apiGet('/sandbox/templates'),
+    ]);
+
+    setApiStatus('online', '已连接');
+    document.getElementById('statTotal').textContent = stats.total_rules || 0;
+    document.getElementById('statDrg').textContent = stats.drg_rules || 0;
+    document.getElementById('statCat').textContent = (stats.categories || []).length;
+
+    templates = templatesResp.items || [];
+    renderTemplates();
+    loadRules();
+
+  } catch (e) {
+    setApiStatus('offline', '连接失败');
+    showToast('无法连接API服务，请确保 api_server.py 已启动 (端口8000)', 'error');
+  }
+}
+
+function setApiStatus(status, text) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + status;
+  document.getElementById('apiStatusText').textContent = text;
+}
+
+// ============================================================================
+// 模板渲染
+// ============================================================================
+function renderTemplates() {
+  const grid = document.getElementById('templateGrid');
+  grid.innerHTML = templates.map(t => `
+    <button class="template-btn" id="tmpl-${t.category}" onclick="loadTemplate('${t.category}')" title="${t.sample}">
+      <span class="tname">${t.name}</span>
+      <span class="tcount">${t.count}条规则</span>
+    </button>
+  `).join('');
+}
+
+let activeTemplateCategory = '';
+function highlightTemplate(category) {
+  // 取消上一个高亮
+  document.querySelectorAll('.template-btn').forEach(el => el.classList.remove('active'));
+  // 高亮当前
+  const el = document.getElementById(`tmpl-${category}`);
+  if (el) el.classList.add('active');
+  activeTemplateCategory = category;
+}
+
+async function loadTemplate(category) {
+  try {
+    showLoading('加载模板...');
+
+    // 并行加载模板数据和该类别规则列表
+    const [tmplResp, rulesResp] = await Promise.all([
+      apiGet(`/sandbox/template/${category}`),
+      apiGet('/sandbox/rules', { category: category, limit: 5000 }),
+    ]);
+
+    const templates = tmplResp.templates;
+    const stage = templates.stage || 'post_audit';
+
+    // 优先加载违规场景
+    const scenario = templates.violation || templates.pass;
+    if (!scenario) {
+      showToast('该类别暂无预置模板', 'info');
+      return;
+    }
+
+    // 1. 过滤左侧规则列表到对应类别
+     currentRules = rulesResp.items || [];
+     renderedCount = 0;
+     renderRules();
+     document.getElementById('ruleCount').textContent = currentRules.length;
+     highlightTemplate(category);
+
+    // 2. 填充测试表单
+    applyTemplate(scenario, stage);
+
+    // 提示
+    if (templates.violation && templates.pass) {
+      showToast(`已加载"${scenario.name}"（${stage}阶段），左侧显示${currentRules.length}条同类规则`, 'info');
+    } else {
+      showToast(`已加载"${scenario.name}"（${stage}阶段），左侧显示${currentRules.length}条同类规则`, 'info');
+    }
+
+    // 3. 自动执行测试
+    setTimeout(() => runTest(), 300);
+
+  } catch (e) {
+    showToast('加载模板失败: ' + e.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function applyTemplate(scenario, stage) {
+  const e = scenario.event;
+  const lines = scenario.lines || [];
+
+  // 设置审核阶段（模板指定）
+  if (stage) setVal('f_stage', stage);
+
+  // 填充表单
+  setVal('f_gend', e.gend || '1');
+  setVal('f_brdy', e.brdy || '1980-01-01');
+  setVal('f_med_type', e.med_type || '11');
+  setVal('f_hosp_lv', e.hosp_lv || '');
+  setVal('f_insutype', e.insutype || '');
+  setVal('f_dept', e.dept || '');
+  setVal('f_main_diag_code', e.main_diag_code || '');
+  setVal('f_main_diag_name', e.main_diag_name || '');
+  setVal('f_diag_codes', (e.diag_codes || []).join(', '));
+  setVal('f_main_oprn_code', e.main_oprn_code || '');
+  setVal('f_drg_codg', e.drg_codg || '');
+  setVal('f_drg_wt', e.drg_wt || 0);
+  setVal('f_drg_pay', e.drg_pay || 0);
+  setVal('f_inhosp_days', e.inhosp_days || 0);
+  setVal('f_adm_date', e.adm_date || '');
+  setVal('f_dscg_date', e.dscg_date || '');
+  setVal('f_dscg_way', e.dscg_way || '');
+  setVal('f_medfee_sumamt', e.medfee_sumamt || 0);
+  setVal('f_fund_pay_sumamt', e.fund_pay_sumamt || 0);
+
+  // 填充费用行
+  clearLines();
+  lines.forEach(ln => addLine(ln));
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ============================================================================
+// 规则浏览
+// ============================================================================
+async function loadRules(append = false) {
+  if (!append) ruleOffset = 0;
+  const keyword = document.getElementById('searchInput').value.trim();
+  const pillar = document.getElementById('filterPillar').value;
+  const stage = document.getElementById('filterStage').value;
+
+  try {
+    const data = await apiGet('/sandbox/rules', {
+      keyword, pillar, stage,
+      limit: 5000,  // 一次性加载全部数据到内存
+    });
+    currentRules = data.items || [];
+    renderedCount = 0;
+    renderRules();
+    document.getElementById('ruleCount').textContent = data.total || currentRules.length;
+  } catch (e) {
+    showToast('加载规则失败: ' + e.message, 'error');
+  }
+}
+
+function renderRules() {
+  const list = document.getElementById('ruleList');
+  if (currentRules.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-tertiary);font-size:12px;">无匹配规则</div>';
+    document.getElementById('loadMore').style.display = 'none';
+    return;
+  }
+
+  // 首次渲染或重置
+  if (renderedCount === 0) {
+    list.innerHTML = '';
+  }
+
+  const start = renderedCount;
+  const end = Math.min(start + RENDER_BATCH, currentRules.length);
+
+  // 用DocumentFragment批量插入，减少重排
+  const frag = document.createDocumentFragment();
+  for (let i = start; i < end; i++) {
+    const r = currentRules[i];
+    const pillarClass = `pillar-${r.pillar || 'drug'}`;
+    const pillarLabel = {drug:'YP',project:'XM',consumable:'HC',herbal:'ZY'}[r.pillar] || r.pillar;
+    const div = document.createElement('div');
+    div.className = `rule-item ${r.rule_code === selectedRuleCode ? 'active' : ''}`;
+    div.onclick = () => selectRule(r.rule_code);
+    div.innerHTML = `
+      <div>
+        <span class="rcode">${r.rule_code}</span>
+        <span class="rpillar ${pillarClass}">${pillarLabel}</span>
+      </div>
+      <div class="rname">${r.rule_code_cn || r.rule_name || '(未命名)'}</div>
+      <div class="rcat">${r.rule_category || ''} · ${r.stage || ''}</div>
+    `;
+    frag.appendChild(div);
+  }
+  list.appendChild(frag);
+  renderedCount = end;
+
+  // 显示"加载更多"按钮
+  const loadMoreEl = document.getElementById('loadMore');
+  if (renderedCount < currentRules.length) {
+    loadMoreEl.style.display = 'block';
+    loadMoreEl.textContent = `显示更多 (${renderedCount}/${currentRules.length}) ↓`;
+  } else {
+    loadMoreEl.style.display = 'none';
+  }
+}
+
+function loadMoreRules() {
+  renderRules();
+}
+
+// 防抖搜索
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadRules(), 300);
+});
+document.getElementById('filterPillar').addEventListener('change', () => loadRules());
+document.getElementById('filterStage').addEventListener('change', () => loadRules());
+
+// ============================================================================
+// 规则选择
+// ============================================================================
+async function selectRule(ruleCode) {
+  selectedRuleCode = ruleCode;
+  renderRules();
+
+  // 显示选中规则栏
+  const rule = currentRules.find(r => r.rule_code === ruleCode);
+  if (rule) {
+    document.getElementById('selectedRuleBar').style.display = 'flex';
+    document.getElementById('srCode').textContent = rule.rule_code;
+    document.getElementById('srName').textContent = rule.rule_code_cn || rule.rule_name || '';
+
+    // 自动切换到该规则所在的审核阶段
+    if (rule.stage) {
+      setVal('f_stage', rule.stage);
+      showToast(`已锁定规则: ${ruleCode}（${rule.stage}阶段），测试结果将只显示该规则`, 'info');
+    } else {
+      showToast(`已锁定规则: ${ruleCode}，测试结果将只显示该规则`, 'info');
+    }
+  }
+}
+
+function clearSelectedRule() {
+  selectedRuleCode = '';
+  document.getElementById('selectedRuleBar').style.display = 'none';
+  renderRules();
+}
+
+// ============================================================================
+// 费用明细行管理
+// ============================================================================
+let lineCounter = 0;
+
+function addLine(data = {}) {
+  const container = document.getElementById('lineItems');
+  document.getElementById('lineEmpty').style.display = 'none';
+
+  lineCounter++;
+  const div = document.createElement('div');
+  div.className = 'line-item';
+  div.dataset.lineId = lineCounter;
+  div.innerHTML = `
+    <select class="li-type">
+      <option value="11" ${data.list_type==='11'?'selected':''}>西药</option>
+      <option value="12" ${data.list_type==='12'?'selected':''}>中成药</option>
+      <option value="13" ${data.list_type==='13'?'selected':''}>中药饮片</option>
+      <option value="21" ${data.list_type==='21'?'selected':''}>诊疗项目</option>
+      <option value="31" ${data.list_type==='31'?'selected':''}>耗材</option>
+    </select>
+    <input type="text" class="li-name" placeholder="项目名称" value="${data.med_list_name || ''}">
+    <input type="text" class="li-code" placeholder="目录编码(选填)" value="${data.med_list_codg || ''}">
+    <input type="number" class="li-cnt" placeholder="数量" value="${data.cnt || 1}" style="text-align:center;">
+    <input type="number" class="li-pric" placeholder="单价" value="${data.pric || 0}" style="text-align:center;">
+    <input type="number" class="li-amt" placeholder="金额" value="${data.det_amt || 0}" style="text-align:center;">
+    <button class="line-del" onclick="removeLine(this)">×</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeLine(btn) {
+  const line = btn.closest('.line-item');
+  line.remove();
+  if (document.querySelectorAll('.line-item:not(.header)').length === 0) {
+    document.getElementById('lineEmpty').style.display = 'block';
+  }
+}
+
+function clearLines() {
+  document.querySelectorAll('.line-item:not(.header)').forEach(el => el.remove());
+  document.getElementById('lineEmpty').style.display = 'block';
+}
+
+function getLines() {
+  const lines = [];
+  document.querySelectorAll('.line-item:not(.header)').forEach((el, i) => {
+    lines.push({
+      list_type: el.querySelector('.li-type').value,
+      med_list_name: el.querySelector('.li-name').value.trim(),
+      med_list_codg: el.querySelector('.li-code').value.trim(),
+      cnt: parseFloat(el.querySelector('.li-cnt').value) || 1,
+      pric: parseFloat(el.querySelector('.li-pric').value) || 0,
+      det_amt: parseFloat(el.querySelector('.li-amt').value) || 0,
+    });
+  });
+  return lines;
+}
+
+// ============================================================================
+// 执行测试
+// ============================================================================
+async function runTest() {
+  // 收集表单数据
+  const diagCodesStr = document.getElementById('f_diag_codes').value.trim();
+  const diagCodes = diagCodesStr ? diagCodesStr.split(/[,，\s]+/).filter(s => s) : [];
+
+  const req = {
+    stage: document.getElementById('f_stage').value,
+    gend: document.getElementById('f_gend').value,
+    brdy: document.getElementById('f_brdy').value,
+    med_type: document.getElementById('f_med_type').value,
+    hosp_lv: document.getElementById('f_hosp_lv').value,
+    dept: document.getElementById('f_dept').value,
+    insutype: document.getElementById('f_insutype').value,
+    main_diag_code: document.getElementById('f_main_diag_code').value.trim(),
+    main_diag_name: document.getElementById('f_main_diag_name').value.trim(),
+    diag_codes: diagCodes,
+    main_oprn_code: document.getElementById('f_main_oprn_code').value.trim(),
+    inhosp_days: parseInt(document.getElementById('f_inhosp_days').value) || 0,
+    adm_date: document.getElementById('f_adm_date').value,
+    dscg_date: document.getElementById('f_dscg_date').value,
+    dscg_way: document.getElementById('f_dscg_way').value,
+    drg_codg: document.getElementById('f_drg_codg').value.trim(),
+    drg_wt: parseFloat(document.getElementById('f_drg_wt').value) || 0,
+    drg_pay: parseFloat(document.getElementById('f_drg_pay').value) || 0,
+    medfee_sumamt: parseFloat(document.getElementById('f_medfee_sumamt').value) || 0,
+    fund_pay_sumamt: parseFloat(document.getElementById('f_fund_pay_sumamt').value) || 0,
+    psn_part_amt: 0,
+    lines: getLines(),
+    rule_code_filter: selectedRuleCode,
+  };
+
+  // 基本校验
+  if (req.lines.length === 0 && !req.drg_codg && req.med_type !== '21') {
+    showToast('请至少添加一行费用明细，或选择住院+DRG场景', 'error');
+    return;
+  }
+
+  try {
+    showLoading('正在执行审核...');
+    const result = await apiPost('/sandbox/test', req);
+    hideLoading();
+    renderResults(result);
+  } catch (e) {
+    hideLoading();
+    showToast('测试执行失败: ' + e.message, 'error');
+  }
+}
+
+// ============================================================================
+// 结果渲染
+// ============================================================================
+function renderResults(data) {
+  document.getElementById('resultEmpty').style.display = 'none';
+  document.getElementById('resultContent').style.display = 'block';
+  document.getElementById('clearResultsBtn').style.display = 'inline-flex';
+
+  const results = data.results || [];
+  document.getElementById('resultCount').textContent = results.length;
+
+  // 汇总卡片
+  const summary = document.getElementById('resultSummary');
+  summary.innerHTML = `
+    <div class="result-card violation">
+      <div class="rc-num">${data.violation_count || 0}</div>
+      <div class="rc-label">违规</div>
+    </div>
+    <div class="result-card suspicious">
+      <div class="rc-num">${data.suspicious_count || 0}</div>
+      <div class="rc-label">可疑</div>
+    </div>
+    <div class="result-card pass">
+      <div class="rc-num">${(data.total_results || 0) - (data.violation_count || 0) - (data.suspicious_count || 0)}</div>
+      <div class="rc-label">提示</div>
+    </div>
+    <div class="result-card time">
+      <div class="rc-num">${data.elapsed_ms || 0}ms</div>
+      <div class="rc-label">耗时</div>
+    </div>
+  `;
+
+  // 结果列表
+  const list = document.getElementById('resultList');
+
+  if (results.length === 0) {
+    if (selectedRuleCode) {
+      list.innerHTML = `
+        <div class="pass-banner">
+          ✅ 未触发规则 ${selectedRuleCode}<br>
+          <span style="font-size:12px;font-weight:400;">当前测试数据未命中该规则，规则可能未生效或数据不符合触发条件</span>
+        </div>
+      `;
+    } else {
+      list.innerHTML = `
+        <div class="pass-banner">
+          ✅ 未触发任何规则<br>
+          <span style="font-size:12px;font-weight:400;">当前测试数据通过全部审核规则</span>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  list.innerHTML = results.map((r, i) => {
+    const sev = r.severity || 'info';
+    const sevLabel = { violation: '违规', suspicious: '可疑', info: '提示' }[sev] || sev;
+    const action = r.action || '';
+    const actionLabel = { block: '拦截', warn: '警告', info: '提醒' }[action] || action;
+    const facts = r.matched_facts || {};
+    const factsStr = Object.entries(facts).map(([k,v]) => `${k}: ${JSON.stringify(v)}`).join('\n');
+
+    return `
+      <div class="result-item ${sev}" id="result-${i}">
+        <div class="result-item-header" onclick="toggleResult(${i})">
+          <div class="ri-left">
+            <span class="ri-code">${r.rule_code || '未知'}</span>
+            <span class="ri-sev ${sev}">${sevLabel}</span>
+            ${actionLabel ? `<span class="ri-action">${actionLabel}</span>` : ''}
+          </div>
+          <span class="ri-expand">▶</span>
+        </div>
+        <div class="result-item-body">
+          <div class="rib-section">
+            <div class="rib-label">规则名称</div>
+            <div class="rib-content">${r.rule_text || '(无)'}</div>
+          </div>
+          <div class="rib-section">
+            <div class="rib-label">规则类别 / 柱别 / 阶段</div>
+            <div class="rib-content">${r.rule_category || '-'} · ${r.pillar || '-'} · ${r.stage || '-'}</div>
+          </div>
+          ${r.reasoning ? `
+          <div class="rib-section">
+            <div class="rib-label">推理链</div>
+            <div class="rib-reasoning">${r.reasoning}</div>
+          </div>` : ''}
+          ${factsStr ? `
+          <div class="rib-section">
+            <div class="rib-label">命中事实 (Matched Facts)</div>
+            <div class="rib-facts">${escapeHtml(factsStr)}</div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleResult(idx) {
+  const el = document.getElementById(`result-${idx}`);
+  el.classList.toggle('expanded');
+}
+
+function clearResults() {
+  document.getElementById('resultEmpty').style.display = 'block';
+  document.getElementById('resultContent').style.display = 'none';
+  document.getElementById('clearResultsBtn').style.display = 'none';
+  document.getElementById('resultCount').textContent = '0';
+}
+
+// ============================================================================
+// 辅助函数
+// ============================================================================
+function showLoading(text = '加载中...') {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function clearBuilder() {
+  if (!confirm('确定要清空所有测试数据吗？')) return;
+  setVal('f_gend', '1');
+  setVal('f_brdy', '1980-01-01');
+  setVal('f_med_type', '11');
+  setVal('f_hosp_lv', '');
+  setVal('f_insutype', '');
+  setVal('f_dept', '');
+  setVal('f_main_diag_code', '');
+  setVal('f_main_diag_name', '');
+  setVal('f_diag_codes', '');
+  setVal('f_main_oprn_code', '');
+  setVal('f_drg_codg', '');
+  setVal('f_drg_wt', '0');
+  setVal('f_drg_pay', '0');
+  setVal('f_inhosp_days', '0');
+  setVal('f_adm_date', '');
+  setVal('f_dscg_date', '');
+  setVal('f_dscg_way', '');
+  setVal('f_medfee_sumamt', '0');
+  setVal('f_fund_pay_sumamt', '0');
+  setVal('f_stage', 'post_audit');
+  clearLines();
+  clearSelectedRule();
+  showToast('已清空测试数据', 'success');
+}
+
+function exportTestCase() {
+  const diagCodesStr = document.getElementById('f_diag_codes').value.trim();
+  const diagCodes = diagCodesStr ? diagCodesStr.split(/[,，\s]+/).filter(s => s) : [];
+
+  const testCase = {
+    name: `沙箱测试_${new Date().toISOString().slice(0,19)}`,
+    stage: document.getElementById('f_stage').value,
+    event: {
+      gend: document.getElementById('f_gend').value,
+      brdy: document.getElementById('f_brdy').value,
+      med_type: document.getElementById('f_med_type').value,
+      hosp_lv: document.getElementById('f_hosp_lv').value,
+      dept: document.getElementById('f_dept').value,
+      insutype: document.getElementById('f_insutype').value,
+      main_diag_code: document.getElementById('f_main_diag_code').value.trim(),
+      main_diag_name: document.getElementById('f_main_diag_name').value.trim(),
+      diag_codes: diagCodes,
+      main_oprn_code: document.getElementById('f_main_oprn_code').value.trim(),
+      inhosp_days: parseInt(document.getElementById('f_inhosp_days').value) || 0,
+      adm_date: document.getElementById('f_adm_date').value,
+      dscg_date: document.getElementById('f_dscg_date').value,
+      dscg_way: document.getElementById('f_dscg_way').value,
+      drg_codg: document.getElementById('f_drg_codg').value.trim(),
+      drg_wt: parseFloat(document.getElementById('f_drg_wt').value) || 0,
+      drg_pay: parseFloat(document.getElementById('f_drg_pay').value) || 0,
+      medfee_sumamt: parseFloat(document.getElementById('f_medfee_sumamt').value) || 0,
+      fund_pay_sumamt: parseFloat(document.getElementById('f_fund_pay_sumamt').value) || 0,
+    },
+    lines: getLines(),
+    rule_code_filter: selectedRuleCode,
+  };
+
+  const blob = new Blob([JSON.stringify(testCase, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sandbox_test_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('测试用例已导出', 'success');
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>

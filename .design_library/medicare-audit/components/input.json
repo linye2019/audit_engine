@@ -1,0 +1,23 @@
+{
+  "slug": "input",
+  "schemaVersion": 2,
+  "name": "Input",
+  "category": "form",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "TextInput", "evidence": "Form input with focus states and validation"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["default", "search", "textarea"]}
+  ],
+  "representativeVariants": [
+    {"variant": "default", "whySelected": "Standard text input", "traits": {"bg": "var(--color-surface)", "border": "1px solid var(--color-border)", "radius": "var(--radius-md)", "padding": "var(--space-2) var(--space-3)", "height": "var(--size-input)"}, "childrenDigest": ["label?", "input", "helper?"]},
+    {"variant": "search", "whySelected": "Search input with icon", "traits": {"bg": "var(--color-surface)", "border": "1px solid var(--color-border)", "radius": "var(--radius-lg)", "padding": "var(--space-2) var(--space-3)", "paddingLeft": "var(--space-8)", "height": "var(--size-input)"}, "childrenDigest": ["search-icon", "input"]},
+    {"variant": "textarea", "whySelected": "Multi-line input", "traits": {"bg": "var(--color-surface)", "border": "1px solid var(--color-border)", "radius": "var(--radius-md)", "padding": "var(--space-3)", "minHeight": "80px"}, "childrenDigest": ["label?", "textarea", "helper?"]}
+  ],
+  "anatomy": ["label (optional)", "input field", "helper text (optional)"],
+  "structurePatterns": ["block layout", "label above input", "helper below input"],
+  "usageHints": {"priorityHint": "medium", "spacing": "Label uses --space-1 margin-bottom, helper uses --space-1 margin-top", "states": "focus: teal ring (var(--ring))"},
+  "doNotInvent": ["input with prefix/suffix addons", "password toggle", "numeric stepper"],
+  "unknowns": [],
+  "keyInsightSeed": "Minimal input with teal focus ring"
+}

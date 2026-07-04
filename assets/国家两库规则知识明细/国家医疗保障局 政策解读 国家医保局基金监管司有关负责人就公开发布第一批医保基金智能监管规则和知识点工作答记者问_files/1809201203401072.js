@@ -1,0 +1,101 @@
+document.writeln("<div class=\"tonglan\">");
+document.writeln("	<div class=\"header core clearfix\">");
+document.writeln("		<div class=\"header-left fl\" id=\"localtime\"></div>");
+document.writeln("		<div class=\"header-right fr\" style=\"height:46px;\">");
+document.writeln("			<a href=\"https://mail.nhsa.gov.cn/\" target=\"_blank\" class=\"zhengfu\">公务邮箱</a>|<a href=\"http://www.gov.cn/\" target=\"_blank\" class=\"zhengfu\">中国政府网</a>|<a href=\"javascript:;\" class=\"zhengfu\" onclick=\'toggleToolBar();\'>无障碍浏览</a>|<a href=\"/col/col34/index.html\" style=\"padding-right:18px;\">网站地图</a>");
+document.writeln("<script id=\'barrierfree\' src=\'/module/jslib/accessiblereading/load.js\'></script>");
+document.writeln("    <div class=\"share clearfix\" style=\"display:inline-block;margin-top:3px;float:right;margin-left:20px;display: none;\">");
+document.writeln("<div class=\'share fl\'>");
+document.writeln("  <div class=\'bdsharebuttonbox bdshare-button-style0-16\' data-bd-bind=\'1545987752643\' style=\'width:auto;\'>");
+document.writeln("    <a href=\'#\' class=\'bds_more\' data-cmd=\'more\' style=\'background: none !important;");
+document.writeln("margin: 0px;padding-left:0px !important;display:block;height:40px;font-size:15px;line-height:40px;color:#fff\'>分享</a></div>");
+document.writeln("  <script>window._bd_share_config = {");
+document.writeln("      \'common\': {");
+document.writeln("        \'bdSnsKey\': {},");
+document.writeln("        \'bdText\': \'\',");
+document.writeln("        \'bdMini\': \'1\',");
+document.writeln("        \'bdMiniList\': [\'people\', \'tsina\', \'tqq\', \'qzone\', \'sqq\', \'weixin\'],");
+document.writeln("        \'bdPic\': \'\',");
+document.writeln("        \'bdStyle\': \'0\',");
+document.writeln("        \'bdSize\': \'16\',");
+document.writeln("        \'bdPopupOffsetLeft\': \'-55\'");
+document.writeln("      },");
+document.writeln("      \'share\': {},");
+document.writeln("      \'selectShare\': {");
+document.writeln("        \'bdContainerClass\': null,");
+document.writeln("        \'bdSelectMiniList\': [\'qzone\', \'tsina\', \'tqq\', \'renren\', \'weixin\']");
+document.writeln("      }");
+document.writeln("    };");
+document.writeln("    with(document) 0[(getElementsByTagName(\'head\')[0] || body).appendChild(createElement(\'script\')).src = \'/static/api/js/share.js?v=89860593.js?cdnversion=\' + ~ ( - new Date() / 36e5)];</script>");
+document.writeln("</div>");
+
+document.writeln("		</div>");
+document.writeln("	</div>");
+document.writeln("</div>");
+document.writeln("</div>");
+document.writeln("<div class=\"top clearfix core\">");
+document.writeln("	<div class=\"top-logo clearfix fl\">");
+document.writeln("		<table>");
+document.writeln("			<tr>");
+document.writeln("				<td><a href=\"/\"><img src=\"/picture/1/2101050941107666352.png\"/></a></td>");
+document.writeln("			</tr>");
+document.writeln("		</table>");
+document.writeln("");
+document.writeln("	</div>");
+document.writeln("	<div class=\"top-sea fr\">");
+document.writeln("		<form name=\"searchform\" action=\"/jrobot/search.do\" method=\"get\" target=\"_blank\" class=\"clearfix\">");
+document.writeln("						<input id=\"webid\" name=\"webid\" type=\"hidden\" value=\"1\">");
+document.writeln("						<input id=\"pg\" name=\"pg\" type=\"hidden\" value=\"\">");
+document.writeln("						<input id=\"p\" name=\"p\" type=\"hidden\" value=\"\">");
+document.writeln("						<input id=\"tpl\" name=\"tpl\" type=\"hidden\" value=\"\">");
+document.writeln("						<input id=\"category\" name=\"category\" type=\"hidden\" value=\"\">");
+document.writeln("			<input type=\"text\" id=\"q\" name=\"q\"  autocomplete=\"off\" value=\"请输入关键字查询\" class=\"text fl\"/>");
+document.writeln("			<input type=\"submit\" name=\"\" value=\"搜 索\" class=\"sub fl\"/>");
+document.writeln("		</form>");
+document.writeln("	</div>");
+document.writeln("</div>");
+document.writeln("<style type=\"text/css\">");
+document.writeln(".bdshare_dialog_bg{width:auto !important;height:auto !important;}");
+document.writeln(".bd_weixin_popup{height:auto !important;}");
+document.writeln(".zhuanti ul li{min-height:84px;}");
+document.writeln("</style>");
+
+
+function showLocale(objD) {
+    var str, colorhead, colorfoot;
+    var yy = objD.getYear();
+    if (yy < 1900) yy = yy + 1900;
+    var MM = objD.getMonth() + 1;
+    if (MM < 10) MM = '0' + MM;
+    var dd = objD.getDate();
+    if (dd < 10) dd = '0' + dd;
+    var hh = objD.getHours();
+    if (hh < 10) hh = '0' + hh;
+    var mm = objD.getMinutes();
+    if (mm < 10) mm = '0' + mm;
+    var ss = objD.getSeconds();
+    if (ss < 10) ss = '0' + ss;
+    var ww = objD.getDay();
+    if (ww == 0) colorhead = "<font color=\"#ffffff\">";
+    if (ww > 0 && ww < 6) colorhead = "<font color=\"#ffffff\">";
+    if (ww == 6) colorhead = "<font color=\"#ffffff\">";
+    if (ww == 0) ww = "星期日";
+    if (ww == 1) ww = "星期一";
+    if (ww == 2) ww = "星期二";
+    if (ww == 3) ww = "星期三";
+    if (ww == 4) ww = "星期四";
+    if (ww == 5) ww = "星期五";
+    if (ww == 6) ww = "星期六";
+    colorfoot = "</font>"
+    str = colorhead + yy + "年" + MM + "月" + dd + "日" + " " + ww + colorfoot;
+    //alert(str);
+    return str;
+}
+
+function tick() {
+    var today;
+    today = new Date();
+    document.getElementById("localtime").innerHTML = showLocale(today);
+    window.setTimeout("tick()", 1000);
+}
+tick();

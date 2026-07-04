@@ -1,0 +1,24 @@
+{
+  "slug": "badge",
+  "schemaVersion": 2,
+  "name": "Badge",
+  "category": "data-display",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "Badge", "evidence": "Small label for status and severity classification"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["success", "warning", "error", "info"]}
+  ],
+  "representativeVariants": [
+    {"variant": "success", "whySelected": "Pass/compliant status", "traits": {"bg": "rgba(16,185,129,0.1)", "color": "var(--med-green-700)", "padding": "2px 10px", "radius": "var(--radius-full)", "fontSize": "var(--type-caption-size)"}, "childrenDigest": ["label"]},
+    {"variant": "warning", "whySelected": "Suspicious/warning status", "traits": {"bg": "rgba(245,158,11,0.1)", "color": "var(--med-amber-700)", "padding": "2px 10px", "radius": "var(--radius-full)", "fontSize": "var(--type-caption-size)"}, "childrenDigest": ["label"]},
+    {"variant": "error", "whySelected": "Violation/error status", "traits": {"bg": "rgba(239,68,68,0.1)", "color": "var(--med-red-700)", "padding": "2px 10px", "radius": "var(--radius-full)", "fontSize": "var(--type-caption-size)"}, "childrenDigest": ["label"]},
+    {"variant": "info", "whySelected": "Informational status", "traits": {"bg": "rgba(6,182,212,0.1)", "color": "var(--med-cyan-700)", "padding": "2px 10px", "radius": "var(--radius-full)", "fontSize": "var(--type-caption-size)"}, "childrenDigest": ["label"]}
+  ],
+  "anatomy": ["label text"],
+  "structurePatterns": ["inline element", "flex center aligned"],
+  "usageHints": {"priorityHint": "medium", "spacing": "Use inside table cells or card headers", "states": "no interactive states"},
+  "doNotInvent": ["dismissible badge", "badge with icon", "badge with counter"],
+  "unknowns": [],
+  "keyInsightSeed": "Semantic severity badges for audit results"
+}

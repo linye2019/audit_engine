@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沙箱测试 - 医保智能审核规则知识查询系统</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    color: #333;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: flex-end;
+    min-height: 100vh;
+  }
+  /* 模拟左侧内容区 */
+  .fake-left {
+    width: calc(100% - 400px);
+    background: #fff;
+    border-right: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 16px;
+  }
+  /* 沙箱面板 */
+  .sandbox-panel {
+    width: 400px;
+    min-width: 400px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* 顶部标题栏 */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fafbfc;
+    flex-shrink: 0;
+  }
+  .panel-header .title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-header .title .icon {
+    width: 18px; height: 18px;
+    border: 2px solid #1890ff;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #1890ff;
+    font-weight: 700;
+  }
+  .close-btn {
+    width: 28px; height: 28px;
+    border: none;
+    background: none;
+    color: #999;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .close-btn:hover { background: #f0f0f0; color: #666; }
+  /* 可滚动内容 */
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0 12px 0;
+  }
+  .panel-body::-webkit-scrollbar { width: 5px; }
+  .panel-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+
+  /* 区域通用 */
+  .section {
+    padding: 14px 18px 0 18px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1890ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    background: #1890ff;
+    border-radius: 2px;
+  }
+
+  /* 区域一：快速填充 */
+  .quick-fill {
+    display: flex;
+    gap: 8px;
+  }
+  .quick-fill button {
+    flex: 1;
+    padding: 7px 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    background: #fff;
+    color: #555;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .quick-fill button:hover { border-color: #1890ff; color: #1890ff; }
+  .quick-fill button.btn-clear:hover { border-color: #ff4d4f; color: #ff4d4f; }
+
+  /* 分组卡片 */
+  .group-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #fafbfc;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #e8e8e8;
+    transition: background .15s;
+  }
+  .group-header:hover { background: #f0f5ff; }
+  .group-header .label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .group-header .label .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .group-header .arrow {
+    font-size: 10px;
+    color: #999;
+    transition: transform .2s;
+  }
+  .group-header.collapsed .arrow { transform: rotate(-90deg); }
+  .group-body {
+    padding: 10px 12px;
+    transition: all .2s;
+  }
+  .group-body.hidden {
+    display: none;
+  }
+
+  /* 表单 */
+  .form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .form-row:last-child { margin-bottom: 0; }
+  .form-label {
+    width: 72px;
+    min-width: 72px;
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+  .form-control input,
+  .form-control select {
+    width: 100%;
+    height: 30px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #333;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .form-control input:focus,
+  .form-control select:focus {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
+  }
+  .form-control input[readonly] {
+    background: #f5f5f5;
+    color: #999;
+    cursor: default;
+  }
+  .form-control .hint {
+    font-size: 10px;
+    color: #bbb;
+    margin-top: 2px;
+  }
+
+  /* 费用明细表 */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .detail-table thead th {
+    background: #fafbfc;
+    padding: 6px 4px;
+    border: 1px solid #e8e8e8;
+    font-weight: 500;
+    color: #666;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+  .detail-table tbody td {
+    padding: 4px;
+    border: 1px solid #e8e8e8;
+    vertical-align: middle;
+  }
+  .detail-table tbody td input,
+  .detail-table tbody td select {
+    width: 100%;
+    height: 26px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-family: inherit;
+    color: #333;
+    background: #fff;
+    outline: none;
+  }
+  .detail-table tbody td input:focus,
+  .detail-table tbody td select:focus {
+    border-color: #1890ff;
+  }
+  .detail-table tbody td input[readonly] {
+    background: #f5f5f5;
+    color: #999;
+  }
+  .detail-table tbody td .calc-val {
+    display: block;
+    text-align: right;
+    padding: 0 4px;
+    font-variant-numeric: tabular-nums;
+    color: #333;
+  }
+  .del-row-btn {
+    width: 22px; height: 22px;
+    border: none;
+    background: none;
+    color: #ff4d4f;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .del-row-btn:hover { background: #fff1f0; }
+  .add-row-btn {
+    width: 100%;
+    padding: 7px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 4px;
+    background: none;
+    color: #1890ff;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .add-row-btn:hover { border-color: #1890ff; background: #f0f5ff; }
+
+  /* 运行测试按钮 */
+  .run-btn-wrap {
+    padding: 14px 18px;
+  }
+  .run-btn {
+    width: 100%;
+    height: 38px;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #52c41a, #73d13d);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all .2s;
+    box-shadow: 0 2px 8px rgba(82,196,26,0.3);
+  }
+  .run-btn:hover {
+    background: linear-gradient(135deg, #49b018, #68c636);
+    box-shadow: 0 4px 12px rgba(82,196,26,0.4);
+    transform: translateY(-1px);
+  }
+  .run-btn:active { transform: translateY(0); }
+  .run-btn .play-icon {
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 6px 0 6px 10px;
+    border-color: transparent transparent transparent #fff;
+  }
+
+  /* 测试结果区域 */
+  .result-section {
+    padding: 0 18px;
+  }
+  .result-card {
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .result-card.pass {
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+  }
+  .result-card.fail {
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+  }
+  .result-card .result-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .result-card .result-header .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .result-card.pass .status-dot { background: #52c41a; }
+  .result-card.fail .status-dot { background: #ff4d4f; }
+  .result-card .result-header .status-text {
+    font-weight: 600;
+  }
+  .result-card.pass .status-text { color: #389e0d; }
+  .result-card.fail .status-text { color: #cf1322; }
+
+  /* 触发消息 */
+  .trigger-msg {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #ad6800;
+    line-height: 1.6;
+  }
+
+  /* 条件明细 */
+  .condition-list {
+    margin-bottom: 10px;
+  }
+  .condition-item {
+    padding: 7px 10px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    background: #fafafa;
+    font-size: 12px;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .condition-item.met {
+    border-left: 3px solid #52c41a;
+  }
+  .condition-item.unmet {
+    border-left: 3px solid #ff4d4f;
+  }
+  .condition-item .cond-status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-top: 1px;
+  }
+  .condition-item.met .cond-status {
+    background: #f6ffed;
+    color: #389e0d;
+  }
+  .condition-item.unmet .cond-status {
+    background: #fff2f0;
+    color: #cf1322;
+  }
+  .condition-item .cond-text {
+    color: #555;
+    flex: 1;
+  }
+  .condition-item .cond-text code {
+    background: #f0f0f0;
+    padding: 0 3px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-family: "SF Mono", "Menlo", monospace;
+    color: #1890ff;
+  }
+
+  /* 出参展示 */
+  .output-card {
+    background: #f0f5ff;
+    border: 1px solid #d6e4ff;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .output-card .output-title {
+    font-weight: 600;
+    color: #1890ff;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .output-card .output-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    color: #555;
+    font-size: 11px;
+  }
+  .output-card .output-row .key {
+    color: #1890ff;
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 11px;
+  }
+  .output-card .output-row .val {
+    font-weight: 500;
+    color: #333;
+  }
+  .output-card .output-row .val.red { color: #ff4d4f; }
+  .output-card .output-row .val.green { color: #52c41a; }
+
+  /* 标签 */
+  .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .tag-red { background: #fff2f0; color: #cf1322; border: 1px solid #ffccc7; }
+  .tag-blue { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+
+  /* 底部说明 */
+  .footer-tips {
+    padding: 12px 18px;
+    border-top: 1px solid #f0f0f0;
+    background: #fafbfc;
+    flex-shrink: 0;
+  }
+  .footer-tips p {
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.7;
+    margin-bottom: 2px;
+  }
+  .footer-tips p:last-child { margin-bottom: 0; }
+  .footer-tips .tip-label {
+    color: #bbb;
+    font-weight: 500;
+  }
+
+  /* 规则类型选择 */
+  .rule-type-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 3px;
+  }
+  .rule-type-bar button {
+    flex: 1;
+    padding: 6px 0;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    background: transparent;
+    color: #666;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .rule-type-bar button.active {
+    background: #fff;
+    color: #1890ff;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .rule-type-bar button:hover:not(.active) { color: #333; }
+
+  /* 选中规则展示 */
+  .selected-rule {
+    background: #f0f5ff;
+    border: 1px solid #d6e4ff;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+  .selected-rule .rule-name {
+    font-weight: 600;
+    color: #1890ff;
+    margin-bottom: 4px;
+  }
+  .selected-rule .rule-desc {
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* 分割线 */
+  .divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 12px 18px;
+  }
+
+  /* 结果区域动画 */
+  .result-section {
+    animation: fadeIn .3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 420px;
+    background: #333;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all .3s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 数量输入 narrower */
+  .detail-table .narrow-col { width: 52px; }
+  .detail-table .med-col { min-width: 80px; }
+</style>
+</head>
+<body>
+
+<div class="fake-left">
+  <span>规则知识查询主界面（模拟）</span>
+</div>
+
+<div class="sandbox-panel">
+  <!-- 标题栏 -->
+  <div class="panel-header">
+    <div class="title">
+      <span class="icon">S</span>
+      沙箱测试
+    </div>
+    <button class="close-btn" title="关闭沙箱">&times;</button>
+  </div>
+
+  <div class="panel-body">
+    <!-- 当前选中规则 -->
+    <div class="section">
+      <div class="selected-rule">
+        <div class="rule-name">药品区分性别使用</div>
+        <div class="rule-desc">
+          <span class="tag tag-red">违规规则</span>
+          检测药品使用与患者性别是否匹配（如男性使用女性专用药品）
+        </div>
+      </div>
+    </div>
+
+    <!-- 规则类型切换 -->
+    <div class="section" style="padding-bottom: 0;">
+      <div class="rule-type-bar">
+        <button class="active" onclick="switchRuleType(this, 'drug')">药品规则</button>
+        <button onclick="switchRuleType(this, 'project')">医疗服务规则</button>
+        <button onclick="switchRuleType(this, 'consumable')">耗材规则</button>
+      </div>
+    </div>
+
+    <!-- 区域一：快速填充 -->
+    <div class="section">
+      <div class="section-title">测试用例快速填充</div>
+      <div class="quick-fill">
+        <button onclick="fillCompliant()">合规场景</button>
+        <button onclick="fillViolation()">违规场景</button>
+        <button class="btn-clear" onclick="clearAll()">清空</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 区域二：就诊信息 -->
+    <div class="section">
+      <div class="section-title">就诊信息</div>
+
+      <!-- 基本信息 -->
+      <div class="group-card">
+        <div class="group-header" onclick="toggleGroup(this)">
+          <span class="label"><span class="dot" style="background:#1890ff"></span>基本信息</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="group-body">
+          <div class="form-row">
+            <span class="form-label">性别</span>
+            <div class="form-control">
+              <select id="patient_gender">
+                <option value="">请选择</option>
+                <option value="1">男</option>
+                <option value="2">女</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">出生日期</span>
+            <div class="form-control">
+              <input type="date" id="birth_date" onchange="calcAge()">
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">患者年龄</span>
+            <div class="form-control">
+              <input type="text" id="patient_age" readonly placeholder="自动计算">
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">科室类型</span>
+            <div class="form-control">
+              <select id="ward_type">
+                <option value="">请选择</option>
+                <option value="内科">内科</option>
+                <option value="外科">外科</option>
+                <option value="妇产科">妇产科</option>
+                <option value="儿科">儿科</option>
+                <option value="骨科">骨科</option>
+                <option value="眼科">眼科</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 医保信息 -->
+      <div class="group-card">
+        <div class="group-header" onclick="toggleGroup(this)">
+          <span class="label"><span class="dot" style="background:#52c41a"></span>医保信息</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="group-body">
+          <div class="form-row">
+            <span class="form-label">险种类型</span>
+            <div class="form-control">
+              <select id="insurance_type">
+                <option value="">请选择</option>
+                <option value="城镇职工">城镇职工</option>
+                <option value="城乡居民">城乡居民</option>
+                <option value="公费医疗">公费医疗</option>
+                <option value="工伤保险">工伤保险</option>
+                <option value="生育保险">生育保险</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">就医方式</span>
+            <div class="form-control">
+              <select id="visit_type">
+                <option value="">请选择</option>
+                <option value="门诊">门诊</option>
+                <option value="住院">住院</option>
+                <option value="急诊">急诊</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">互联网医院</span>
+            <div class="form-control">
+              <select id="is_internet">
+                <option value="否">否</option>
+                <option value="是">是</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">处方类型</span>
+            <div class="form-control">
+              <select id="prescription_type">
+                <option value="">请选择</option>
+                <option value="普通">普通</option>
+                <option value="慢病">慢病</option>
+                <option value="特病">特病</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 诊断与手术 -->
+      <div class="group-card">
+        <div class="group-header" onclick="toggleGroup(this)">
+          <span class="label"><span class="dot" style="background:#fa8c16"></span>诊断与手术</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="group-body">
+          <div class="form-row">
+            <span class="form-label">主诊断编码</span>
+            <div class="form-control">
+              <input type="text" id="diag_main" placeholder="如 J06.900">
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">副诊断编码</span>
+            <div class="form-control">
+              <input type="text" id="diag_sub" placeholder="逗号分隔，如 J98.400,E78.500">
+              <div class="hint">多个编码用英文逗号分隔</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">主要手术编码</span>
+            <div class="form-control">
+              <input type="text" id="surgery_code" placeholder="如 81.5100">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 就诊机构 -->
+      <div class="group-card">
+        <div class="group-header" onclick="toggleGroup(this)">
+          <span class="label"><span class="dot" style="background:#722ed1"></span>就诊机构</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="group-body">
+          <div class="form-row">
+            <span class="form-label">医院等级</span>
+            <div class="form-control">
+              <select id="hospital_level">
+                <option value="">请选择</option>
+                <option value="不限">不限</option>
+                <option value="一级">一级</option>
+                <option value="二级">二级</option>
+                <option value="三级">三级</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 区域三：费用明细 -->
+    <div class="section">
+      <div class="section-title">费用明细 <span class="tag tag-blue" id="line_count_tag">0 项</span></div>
+      <div style="overflow-x:auto;">
+        <table class="detail-table" id="detail_table">
+          <thead>
+            <tr>
+              <th style="width:58px">项目编码</th>
+              <th class="med-col">名称</th>
+              <th class="narrow-col">数量</th>
+              <th class="narrow-col">单价</th>
+              <th class="narrow-col">金额</th>
+              <th class="narrow-col">目录</th>
+              <th class="narrow-col">天数</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="detail_tbody">
+            <!-- 动态行 -->
+          </tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addDetailRow()">+ 添加费用明细</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 区域四：运行测试 -->
+    <div class="run-btn-wrap">
+      <button class="run-btn" onclick="runTest()">
+        <span class="play-icon"></span>
+        运行测试
+      </button>
+    </div>
+
+    <!-- 区域五：测试结果（初始隐藏） -->
+    <div id="result_area" style="display:none;"></div>
+  </div>
+
+  <!-- 区域六：底部说明 -->
+  <div class="footer-tips">
+    <p><span class="tip-label">操作提示：</span>点击「合规场景」/「违规场景」可快速填充测试数据，也可手动编辑各字段。</p>
+    <p><span class="tip-label">费用明细：</span>金额字段根据「数量 x 单价」自动计算，支持添加多条明细。</p>
+    <p><span class="tip-label">规则类型：</span>顶部可切换药品/医疗服务/耗材规则，不同规则使用不同的入参字段。</p>
+    <p><span class="tip-label">测试结果：</span>展示规则命中状态、条件明细及聚合字段计算逻辑。</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 分组折叠 =====
+function toggleGroup(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  body.classList.toggle('hidden');
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ===== 规则类型切换 =====
+function switchRuleType(btn, type) {
+  document.querySelectorAll('.rule-type-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const ruleNames = {
+    drug: '药品区分性别使用',
+    project: '医疗服务项目重复收费',
+    consumable: '医用耗材超标准使用'
+  };
+  const ruleDescs = {
+    drug: '<span class="tag tag-red">违规规则</span> 检测药品使用与患者性别是否匹配（如男性使用女性专用药品）',
+    project: '<span class="tag tag-red">违规规则</span> 检测同一住院期间是否存在相同医疗服务项目重复收费',
+    consumable: '<span class="tag tag-blue">限制规则</span> 检测高值耗材使用是否超出医保限定标准'
+  };
+  document.querySelector('.selected-rule .rule-name').textContent = ruleNames[type];
+  document.querySelector('.selected-rule .rule-desc').innerHTML = ruleDescs[type];
+  showToast('已切换至' + {drug:'药品规则',project:'医疗服务规则',consumable:'耗材规则'}[type]);
+}
+
+// ===== 年龄计算 =====
+function calcAge() {
+  const bd = document.getElementById('birth_date').value;
+  if (!bd) { document.getElementById('patient_age').value = ''; return; }
+  const birth = new Date(bd);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  document.getElementById('patient_age').value = age + ' 岁';
+}
+
+// ===== 费用明细行操作 =====
+let rowCount = 0;
+function addDetailRow(data) {
+  rowCount++;
+  const d = data || {};
+  const tr = document.createElement('tr');
+  tr.dataset.id = rowCount;
+  tr.innerHTML = `
+    <td><input type="text" value="${d.code||''}" placeholder="编码"></td>
+    <td><input type="text" value="${d.name||''}" placeholder="名称"></td>
+    <td><input type="number" class="qty" value="${d.qty||1}" min="0" step="1" onchange="calcRowAmt(this)"></td>
+    <td><input type="number" class="price" value="${d.price||0}" min="0" step="0.01" onchange="calcRowAmt(this)"></td>
+    <td><span class="calc-val">${((d.qty||1)*(d.price||0)).toFixed(2)}</span></td>
+    <td><select>
+      <option value="甲类" ${d.list_type==='甲类'?'selected':''}>甲类</option>
+      <option value="乙类" ${d.list_type==='乙类'||!d.list_type?'selected':''}>乙类</option>
+      <option value="丙类" ${d.list_type==='丙类'?'selected':''}>丙类</option>
+    </select></td>
+    <td><input type="number" value="${d.days||''}" min="0" step="1" placeholder="天"></td>
+    <td style="text-align:center"><button class="del-row-btn" onclick="delDetailRow(this)" title="删除">&times;</button></td>
+  `;
+  document.getElementById('detail_tbody').appendChild(tr);
+  updateLineCount();
+}
+
+function delDetailRow(btn) {
+  btn.closest('tr').remove();
+  updateLineCount();
+}
+
+function calcRowAmt(el) {
+  const tr = el.closest('tr');
+  const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+  const price = parseFloat(tr.querySelector('.price').value) || 0;
+  tr.querySelector('.calc-val').textContent = (qty * price).toFixed(2);
+}
+
+function updateLineCount() {
+  const n = document.getElementById('detail_tbody').children.length;
+  document.getElementById('line_count_tag').textContent = n + ' 项';
+}
+
+// ===== 快速填充 =====
+function fillCompliant() {
+  // 合规场景：男性，普通感冒
+  document.getElementById('patient_gender').value = '1';
+  document.getElementById('birth_date').value = '1985-03-15';
+  calcAge();
+  document.getElementById('ward_type').value = '内科';
+  document.getElementById('insurance_type').value = '城镇职工';
+  document.getElementById('visit_type').value = '门诊';
+  document.getElementById('is_internet').value = '否';
+  document.getElementById('prescription_type').value = '普通';
+  document.getElementById('diag_main').value = 'J06.900';
+  document.getElementById('diag_sub').value = '';
+  document.getElementById('surgery_code').value = '';
+  document.getElementById('hospital_level').value = '三级';
+  // 清空费用
+  document.getElementById('detail_tbody').innerHTML = '';
+  addDetailRow({code:'XB01AA', name:'阿莫西林胶囊', qty:2, price:15.50, list_type:'甲类', days:7});
+  addDetailRow({code:'XB03BA', name:'布洛芬缓释片', qty:1, price:22.00, list_type:'乙类', days:5});
+  hideResult();
+  showToast('已填充合规场景（男性普通感冒）');
+}
+
+function fillViolation() {
+  // 违规场景：男性使用女性专用药品
+  document.getElementById('patient_gender').value = '1';
+  document.getElementById('birth_date').value = '1978-08-20';
+  calcAge();
+  document.getElementById('ward_type').value = '妇产科';
+  document.getElementById('insurance_type').value = '城乡居民';
+  document.getElementById('visit_type').value = '门诊';
+  document.getElementById('is_internet').value = '否';
+  document.getElementById('prescription_type').value = '普通';
+  document.getElementById('diag_main').value = 'N92.400';
+  document.getElementById('diag_sub').value = 'J06.900';
+  document.getElementById('surgery_code').value = '';
+  document.getElementById('hospital_level').value = '二级';
+  // 清空费用
+  document.getElementById('detail_tbody').innerHTML = '';
+  addDetailRow({code:'XB05GF', name:'妇科千金片', qty:3, price:28.00, list_type:'乙类', days:10});
+  addDetailRow({code:'XB07HC', name:'乙烯雌酚片', qty:2, price:12.50, list_type:'丙类', days:14});
+  hideResult();
+  showToast('已填充违规场景（男性使用女性药品）');
+}
+
+function clearAll() {
+  document.querySelectorAll('.section input, .section select').forEach(el => {
+    if (el.type === 'date' || el.type === 'number' || el.type === 'text') {
+      el.value = '';
+    } else if (el.tagName === 'SELECT') {
+      if (el.id === 'is_internet') el.value = '否';
+      else el.selectedIndex = 0;
+    }
+  });
+  document.getElementById('patient_age').value = '';
+  document.getElementById('detail_tbody').innerHTML = '';
+  updateLineCount();
+  hideResult();
+  showToast('已清空所有数据');
+}
+
+function hideResult() {
+  document.getElementById('result_area').style.display = 'none';
+}
+
+// ===== 运行测试 =====
+function runTest() {
+  const gender = document.getElementById('patient_gender').value;
+  const diag = document.getElementById('diag_main').value;
+
+  if (!gender) {
+    showToast('请至少填写患者性别');
+    return;
+  }
+
+  const genderText = gender === '1' ? '男' : '女';
+  const lines = document.getElementById('detail_tbody').children.length;
+
+  // 模拟药品区分性别使用规则逻辑
+  const femaleKeywords = ['妇科', '雌', '孕', '产妇', '催乳', '排卵', '卵泡', '雌二醇', '孕酮', '黄体酮', '缩宫', '保胎', '益母草'];
+  const maleKeywords = ['男科', '前列腺', '雄', '睾酮'];
+
+  let triggered = false;
+  let triggerMsg = '';
+  const conditions = [];
+
+  // 条件1：患者性别
+  conditions.push({
+    met: gender !== '',
+    text: `患者性别已填写：<code>${genderText}</code>`
+  });
+
+  // 条件2：费用明细存在
+  conditions.push({
+    met: lines > 0,
+    text: `费用明细条数：<code>${lines}</code>（需 > 0）`
+  });
+
+  // 条件3：检查药品名称与性别冲突
+  let conflictDrug = '';
+  const drugRows = document.getElementById('detail_tbody').querySelectorAll('tr');
+  for (const row of drugRows) {
+    const name = row.querySelectorAll('input')[1].value;
+    if (!name) continue;
+    if (gender === '1') {
+      // 男性使用女性药品
+      for (const kw of femaleKeywords) {
+        if (name.includes(kw)) {
+          conflictDrug = name;
+          triggered = true;
+          break;
+        }
+      }
+    } else {
+      // 女性使用男性药品
+      for (const kw of maleKeywords) {
+        if (name.includes(kw)) {
+          conflictDrug = name;
+          triggered = true;
+          break;
+        }
+      }
+    }
+    if (triggered) break;
+  }
+
+  conditions.push({
+    met: !triggered,
+    text: `药品性别匹配检查：${triggered ? '<code>' + conflictDrug + '</code> 与患者性别冲突' : '所有药品与患者性别匹配'}`
+  });
+
+  // 条件4：诊断性别匹配
+  const femaleDiagPrefixes = ['N', 'O'];
+  const diagMatchIssue = (gender === '1') && diag && femaleDiagPrefixes.some(p => diag.toUpperCase().startsWith(p));
+  conditions.push({
+    met: !diagMatchIssue,
+    text: `诊断编码性别检查：${diagMatchIssue ? '诊断 <code>' + diag + '</code> 偏向女性' : '诊断编码无明显性别冲突'}`
+  });
+
+  if (triggered) {
+    triggerMsg = `患者为${genderText}性，但处方中包含"${conflictDrug}"，该药品为女性专用药品，违反性别限制使用规则。`;
+  }
+
+  // 聚合字段计算
+  let totalAmt = 0;
+  let totalDays = 0;
+  let drugNames = [];
+  for (const row of drugRows) {
+    const inputs = row.querySelectorAll('input');
+    const qty = parseFloat(inputs[2].value) || 0;
+    const price = parseFloat(inputs[3].value) || 0;
+    totalAmt += qty * price;
+    const days = parseFloat(inputs[6].value) || 0;
+    if (days > totalDays) totalDays = days;
+    drugNames.push(inputs[1].value);
+  }
+
+  // 渲染结果
+  const ra = document.getElementById('result_area');
+  ra.style.display = 'block';
+  ra.innerHTML = `
+    <div class="divider"></div>
+    <div class="result-section">
+      <div class="section-title">测试结果</div>
+
+      <div class="result-card ${triggered ? 'fail' : 'pass'}">
+        <div class="result-header">
+          <span class="status-dot"></span>
+          <span class="status-text">${triggered ? '规则已触发' : '规则未触发'}</span>
+          <span class="tag ${triggered ? 'tag-red' : 'tag-green'}" style="margin-left:auto">${triggered ? '违规' : '合规'}</span>
+        </div>
+        <div style="color:#666;font-size:11px">
+          规则：药品区分性别使用 &nbsp;|&nbsp; 费用明细：${lines} 条 &nbsp;|&nbsp; 总金额：&yen;${totalAmt.toFixed(2)}
+        </div>
+      </div>
+
+      ${triggered ? `
+      <div class="trigger-msg">
+        <strong>触发消息：</strong><br>${triggerMsg}
+      </div>` : ''}
+
+      <div style="margin:10px 0 6px;font-size:12px;font-weight:500;color:#555">条件明细</div>
+      <div class="condition-list">
+        ${conditions.map(c => `
+          <div class="condition-item ${c.met ? 'met' : 'unmet'}">
+            <span class="cond-status">${c.met ? '满足' : '不满足'}</span>
+            <span class="cond-text">${c.text}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="output-card">
+        <div class="output-title">出参 / 聚合字段</div>
+        <div class="output-row">
+          <span class="key">claim_event.claim_lines</span>
+          <span class="val">${lines}</span>
+        </div>
+        <div class="output-row">
+          <span class="key">claim_event.patient_gender</span>
+          <span class="val">${genderText} (${gender})</span>
+        </div>
+        <div class="output-row">
+          <span class="key">claim_event.diag_codes</span>
+          <span class="val">${diag || '(空)'}</span>
+        </div>
+        <div class="output-row">
+          <span class="key">claim_line.med_list_name</span>
+          <span class="val">${drugNames.length > 0 ? drugNames.join(', ') : '(空)'}</span>
+        </div>
+        <div class="output-row">
+          <span class="key">聚合 - 总金额</span>
+          <span class="val ${totalAmt > 200 ? 'red' : 'green'}">&yen;${totalAmt.toFixed(2)}</span>
+        </div>
+        <div class="output-row">
+          <span class="key">聚合 - 最大使用天数</span>
+          <span class="val">${totalDays > 0 ? totalDays + ' 天' : '-'}</span>
+        </div>
+        <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #d6e4ff;font-size:10px;color:#91d5ff">
+          claim_event.claim_lines = 遍历 claim_event.claim_lines 列表，逐条检查 med_list_name 是否匹配性别限制
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 滚动到结果区域
+  ra.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('测试完成');
+}
+
+// ===== 初始化：添加一条空行 =====
+addDetailRow();
+</script>
+</body>
+</html>

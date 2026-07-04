@@ -1,0 +1,21 @@
+{
+  "slug": "sidebar",
+  "schemaVersion": 2,
+  "name": "Sidebar",
+  "category": "navigation",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "Sidebar", "evidence": "Vertical navigation panel for dashboard"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["default"]}
+  ],
+  "representativeVariants": [
+    {"variant": "default", "whySelected": "Main dashboard sidebar", "traits": {"width": "240px", "bg": "var(--med-gray-900)", "color": "#ffffff", "position": "fixed", "height": "100vh", "display": "flex", "flexDirection": "column"}, "childrenDigest": ["logo", "nav-sections(items)", "footer"]}
+  ],
+  "anatomy": ["logo area", "navigation sections", "footer"],
+  "structurePatterns": ["flex column", "logo at top", "nav in middle with overflow-y-auto", "footer at bottom"],
+  "usageHints": {"priorityHint": "high", "spacing": "Nav items use --space-3 vertical padding, --space-5 horizontal padding", "states": "active item has left border + teal highlight"},
+  "doNotInvent": ["collapsible sidebar", "multi-level nested nav", "sidebar with search"],
+  "unknowns": [],
+  "keyInsightSeed": "Dark teal sidebar with AI agent section"
+}

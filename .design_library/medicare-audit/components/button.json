@@ -1,0 +1,25 @@
+{
+  "slug": "button",
+  "schemaVersion": 2,
+  "name": "Button",
+  "category": "interactive",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "Button", "evidence": "Primary action component with variants for severity levels"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["primary", "secondary", "ghost", "danger"]},
+    {"name": "size", "values": ["sm", "md", "lg"]}
+  ],
+  "representativeVariants": [
+    {"variant": "primary-md", "whySelected": "Default primary action", "traits": {"bg": "var(--color-primary)", "color": "#ffffff", "paddingY": "8px", "paddingX": "20px", "radius": "var(--radius-md)", "fontSize": "var(--type-body-size)"}, "childrenDigest": ["icon?", "label"]},
+    {"variant": "secondary-md", "whySelected": "Secondary action with outline", "traits": {"bg": "transparent", "color": "var(--color-primary)", "border": "1px solid var(--color-primary)", "paddingY": "8px", "paddingX": "20px", "radius": "var(--radius-md)"}, "childrenDigest": ["icon?", "label"]},
+    {"variant": "ghost-md", "whySelected": "Tertiary subtle action", "traits": {"bg": "transparent", "color": "var(--color-text-secondary)", "paddingY": "8px", "paddingX": "12px", "radius": "var(--radius-md)"}, "childrenDigest": ["icon?", "label"]},
+    {"variant": "danger-md", "whySelected": "Destructive action", "traits": {"bg": "var(--color-error)", "color": "#ffffff", "paddingY": "8px", "paddingX": "20px", "radius": "var(--radius-md)"}, "childrenDigest": ["icon?", "label"]}
+  ],
+  "anatomy": ["icon (optional)", "label text"],
+  "structurePatterns": ["inline-flex row", "center aligned", "gap for icon+label"],
+  "usageHints": {"priorityHint": "high", "spacing": "Use --space-2 gap between icon and label", "states": "hover darkens bg, disabled reduces opacity"},
+  "doNotInvent": ["icon-only toggle button", "split button", "button group"],
+  "unknowns": [],
+  "keyInsightSeed": "Primary teal with subtle glow for AI actions"
+}

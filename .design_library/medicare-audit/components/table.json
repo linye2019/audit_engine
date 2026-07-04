@@ -1,0 +1,22 @@
+{
+  "slug": "table",
+  "schemaVersion": 2,
+  "name": "Table",
+  "category": "data-display",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "Table", "evidence": "Data grid for rule listing and audit results"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["default", "striped"]}
+  ],
+  "representativeVariants": [
+    {"variant": "default", "whySelected": "Standard data table", "traits": {"bg": "var(--color-surface)", "border": "1px solid var(--color-border)", "radius": "var(--radius-md)", "cellPadding": "var(--space-3) var(--space-4)"}, "childrenDigest": ["thead", "tbody(rows)"]},
+    {"variant": "striped", "whySelected": "Alternating row colors", "traits": {"bg": "var(--color-surface)", "border": "1px solid var(--color-border)", "radius": "var(--radius-md)", "cellPadding": "var(--space-3) var(--space-4)", "stripeBg": "var(--color-surface-raised)"}, "childrenDigest": ["thead", "tbody(rows)"]}
+  ],
+  "anatomy": ["table header (sticky)", "table body with rows"],
+  "structurePatterns": ["full-width overflow-x-auto container", "th: text-left, font-semibold, smaller, muted color", "td: vertical-align middle"],
+  "usageHints": {"priorityHint": "medium", "spacing": "Cell padding --space-3 vertical, --space-4 horizontal", "states": "row hover highlights"},
+  "doNotInvent": ["sortable columns", "resizable columns", "tree table"],
+  "unknowns": [],
+  "keyInsightSeed": "Compact data table with severity badges"
+}

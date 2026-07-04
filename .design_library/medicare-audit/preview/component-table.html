@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table — Medicare Audit</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  /* Page scaffold — NOT extracted */
+  body { margin: 0; padding: var(--space-3); background: var(--color-background); font-family: var(--font-body); color: var(--color-on-surface); }
+  .row { display: flex; gap: var(--space-2); align-items: center; margin-bottom: var(--space-2); }
+  .label { font-size: var(--font-size-eyebrow); font-weight: var(--font-weight-eyebrow); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-on-surface-variant); min-width: 92px; }
+  .divider { border: none; border-top: 1px solid var(--color-border); margin: var(--space-2) 0; }
+
+  /* @component-css-start */
+  /* Component definitions — extracted to components.css by deterministic script */
+  .table-wrap { width: 100%; overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-caption); line-height: var(--line-height-body); }
+  .data-table th { padding: var(--space-3) var(--space-4); text-align: left; font-weight: var(--font-weight-eyebrow); font-size: var(--font-size-eyebrow); color: var(--color-on-surface-variant); background: var(--color-surface-dim); white-space: nowrap; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 1; }
+  .data-table td { padding: var(--space-3) var(--space-4); vertical-align: middle; border-bottom: 1px solid var(--color-outline-variant); white-space: nowrap; }
+  .data-table tbody tr { transition: filter .15s; }
+  .data-table tbody tr:hover { filter: brightness(0.97); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table.striped tbody tr:nth-child(even) { background: var(--color-surface-container-low); }
+  .badge { display: inline-flex; align-items: center; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: 11px; font-weight: 500; white-space: nowrap; line-height: 1.4; min-width: 20px; }
+  .badge-error { background: var(--med-red-50); color: var(--color-error); }
+  .badge-warning { background: var(--med-amber-50); color: var(--color-warning); }
+  .badge-info { background: var(--med-blue-50); color: var(--med-blue-500); }
+  .badge-success { background: var(--med-green-50); color: var(--color-success); }
+  .badge-muted { background: var(--color-surface-container-high); color: var(--color-on-surface-variant); }
+  /* @component-css-end */
+</style>
+</head>
+<body>
+  <div class="row"><span class="label">Default</span></div>
+  <div class="row">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>规则编码</th><th>规则名称</th><th>分类</th><th>审核阶段</th><th>严重等级</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DRG-001</td><td>住院费用超限检查</td><td>DRG</td><td>事前审核</td><td><span class="badge badge-error">违规</span></td><td><span class="badge badge-success">启用</span></td></tr>
+          <tr><td>DRG-002</td><td>药品超量使用检测</td><td>DRG</td><td>事中审核</td><td><span class="badge badge-warning">警告</span></td><td><span class="badge badge-muted">停用</span></td></tr>
+          <tr><td>DRG-003</td><td>诊断编码匹配校验</td><td>DRG</td><td>事后审核</td><td><span class="badge badge-info">提示</span></td><td><span class="badge badge-success">启用</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="row"><span class="label">Striped</span></div>
+  <div class="row">
+    <div class="table-wrap">
+      <table class="data-table striped">
+        <thead>
+          <tr><th>规则编码</th><th>规则名称</th><th>分类</th><th>审核阶段</th><th>严重等级</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DRG-001</td><td>住院费用超限检查</td><td>DRG</td><td>事前审核</td><td><span class="badge badge-error">违规</span></td><td><span class="badge badge-success">启用</span></td></tr>
+          <tr><td>DRG-002</td><td>药品超量使用检测</td><td>DRG</td><td>事中审核</td><td><span class="badge badge-warning">警告</span></td><td><span class="badge badge-muted">停用</span></td></tr>
+          <tr><td>DRG-003</td><td>诊断编码匹配校验</td><td>DRG</td><td>事后审核</td><td><span class="badge badge-info">提示</span></td><td><span class="badge badge-success">启用</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

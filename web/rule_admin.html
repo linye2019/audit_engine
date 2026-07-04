@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>规则管理后台 — 医保智能审核引擎</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-dark: #1557b0;
+    --primary-light: #e8f0fe;
+    --danger: #d93025;
+    --danger-light: #fce8e6;
+    --warning: #f9ab00;
+    --warning-light: #fef7e0;
+    --success: #1e8e3e;
+    --success-light: #e6f4ea;
+    --info: #1a73e8;
+    --info-light: #e8f0fe;
+    --bg: #f0f2f5;
+    --sidebar-bg: #1f2937;
+    --sidebar-hover: #374151;
+    --sidebar-active: #1a73e8;
+    --card-bg: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-tertiary: #9ca3af;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --radius-sm: 6px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: "SF Mono", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 240px;
+    background: var(--sidebar-bg);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 20px;
+    border-bottom: 1px solid #374151;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-logo .icon { font-size: 28px; }
+  .sidebar-logo .title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .sidebar-logo .subtitle {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+  .nav-section {
+    padding: 8px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+  .nav-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover {
+    background: var(--sidebar-hover);
+  }
+  .nav-item.active {
+    background: rgba(26,115,232,0.15);
+    border-left-color: var(--primary);
+    color: #60a5fa;
+  }
+  .nav-item .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #374151;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .topbar {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .status-dot.online { background: var(--success); }
+  .api-status {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  .stat-icon.drug { background: #dbeafe; color: #1d4ed8; }
+  .stat-icon.project { background: #fef3c7; color: #b45309; }
+  .stat-icon.consumable { background: #dcfce7; color: #15803d; }
+  .stat-icon.drg { background: #f3e8ff; color: #7c3aed; }
+  .stat-info .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .stat-info .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .filter-group label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  select, input[type="text"], input[type="search"] {
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+  }
+  .search-input {
+    width: 280px;
+  }
+
+  .btn {
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    background: #fff;
+    color: var(--text);
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover {
+    background: #f9fafb;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+  }
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .btn-icon {
+    padding: 6px 10px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: #f9fafb;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+  tr:hover td {
+    background: #f9fafb;
+  }
+  .rule-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .rule-name {
+    font-weight: 500;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-pillar-drug { background: #dbeafe; color: #1d4ed8; }
+  .badge-pillar-project { background: #fef3c7; color: #b45309; }
+  .badge-pillar-consumable { background: #dcfce7; color: #15803d; }
+  .badge-pillar-drg { background: #f3e8ff; color: #7c3aed; }
+  .badge-stage-pre { background: #dbeafe; color: #1d4ed8; }
+  .badge-stage-end_check { background: #fef3c7; color: #b45309; }
+  .badge-stage-post { background: #dcfce7; color: #15803d; }
+  .badge-severity-violation { background: #fecaca; color: #b91c1c; }
+  .badge-severity-suspicious { background: #fef08a; color: #854d0e; }
+  .badge-severity-info { background: #dbeafe; color: #1d4ed8; }
+  .badge-action-block { background: #fecaca; color: #b91c1c; }
+  .badge-action-warn { background: #fef08a; color: #854d0e; }
+  .badge-action-tag { background: #dbeafe; color: #1d4ed8; }
+  .badge-active { background: #dcfce7; color: #15803d; }
+  .badge-inactive { background: #e5e7eb; color: #6b7280; }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .pagination-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .pagination-buttons {
+    display: flex;
+    gap: 4px;
+  }
+  .page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-btn:hover { background: #f9fafb; }
+  .page-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .view-page { display: none; }
+  .view-page.active { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .detail-item {
+    margin-bottom: 12px;
+  }
+  .detail-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .detail-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .detail-section {
+    margin-bottom: 24px;
+  }
+  .detail-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-block {
+    background: #1f2937;
+    color: #e5e7eb;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    overflow-x: auto;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 500;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    position: absolute;
+    left: -23px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  .timeline-dot.create { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
+  .timeline-dot.update { background: var(--warning); box-shadow: 0 0 0 2px var(--warning); }
+  .timeline-dot.deactivate { background: var(--danger); box-shadow: 0 0 0 2px var(--danger); }
+  .timeline-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .timeline-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .timeline-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .diff-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .diff-panel {
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .diff-panel.old { background: #fef2f2; }
+  .diff-panel.new { background: #f0fdf4; }
+  .diff-panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font);
+  }
+  .diff-panel.old .diff-panel-title { color: #b91c1c; }
+  .diff-panel.new .diff-panel-title { color: #15803d; }
+  .diff-line { padding: 2px 4px; white-space: pre-wrap; }
+  .diff-line.old { background: #fecaca; color: #991b1b; }
+  .diff-line.new { background: #bbf7d0; color: #166534; }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  .modal-body { padding: 20px; }
+  .modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .snapshot-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+  .snapshot-card:hover {
+    border-color: var(--primary);
+  }
+  .snapshot-card.current {
+    border-color: var(--success);
+    background: #f0fdf4;
+  }
+  .snapshot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .snapshot-name {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .snapshot-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 16px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  .empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .empty-state .empty-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .empty-state .empty-desc {
+    font-size: 13px;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+  }
+  .spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 13px;
+    z-index: 2000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--primary); }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .back-btn:hover { color: var(--primary); }
+
+  .version-select {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .version-select label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">⚙️</div>
+    <div>
+      <div class="title">规则管理后台</div>
+      <div class="subtitle">医保智能审核引擎</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">概览</div>
+    <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span>仪表盘</span>
+    </div>
+    <div class="nav-section">规则管理</div>
+    <div class="nav-item" data-page="rules" onclick="navigateTo('rules')">
+      <span class="nav-icon">📋</span>
+      <span>规则列表</span>
+    </div>
+    <div class="nav-item" data-page="snapshots" onclick="navigateTo('snapshots')">
+      <span class="nav-icon">📸</span>
+      <span>快照管理</span>
+    </div>
+    <div class="nav-item" data-page="changelog" onclick="navigateTo('changelog')">
+      <span class="nav-icon">📝</span>
+      <span>变更日志</span>
+    </div>
+    <div class="nav-section">工具</div>
+    <div class="nav-item" onclick="window.open('/sandbox','_blank')">
+      <span class="nav-icon">🧪</span>
+      <span>规则沙箱</span>
+    </div>
+    <div class="nav-item" onclick="window.open('/docs','_blank')">
+      <span class="nav-icon">📖</span>
+      <span>API 文档</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    引擎版本: <span id="engine-version">1.1.0</span><br>
+    © 2026 医保智能审核
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="page-title">仪表盘</div>
+    </div>
+    <div class="topbar-right">
+      <div class="api-status">
+        <span class="status-dot" id="api-dot"></span>
+        <span id="api-status-text">连接中...</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div id="page-dashboard" class="view-page active">
+      <div class="stats-grid" id="dashboard-stats">
+        <div class="loading"><div class="spinner"></div>加载中...</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">最近变更</div>
+          <button class="btn btn-sm" onclick="navigateTo('changelog')">查看全部 →</button>
+        </div>
+        <div class="card-body" id="dashboard-changelog">
+          <div class="loading"><div class="spinner"></div>加载中...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">最新快照</div>
+          <button class="btn btn-sm" onclick="navigateTo('snapshots')">查看全部 →</button>
+        </div>
+        <div class="card-body" id="dashboard-snapshots">
+          <div class="loading"><div class="spinner"></div>加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-rules" class="view-page">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">规则列表</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="showCreateRuleModal()">+ 新建规则</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <div class="filter-group">
+              <label>柱别:</label>
+              <select id="filter-pillar" onchange="loadRules(1)">
+                <option value="">全部</option>
+                <option value="YP">药品</option>
+                <option value="FW">项目</option>
+                <option value="HC">耗材</option>
+                <option value="BZ">病种</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>阶段:</label>
+              <select id="filter-stage" onchange="loadRules(1)">
+                <option value="">全部</option>
+                <option value="pre_check">事前</option>
+                <option value="end_check">事中</option>
+                <option value="post_audit">事后</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>状态:</label>
+              <select id="filter-active" onchange="loadRules(1)">
+                <option value="1">启用</option>
+                <option value="0">停用</option>
+                <option value="">全部</option>
+              </select>
+            </div>
+            <div class="filter-group" style="margin-left:auto;">
+              <input type="search" id="search-input" class="search-input" placeholder="搜索规则编码/名称..." onkeyup="if(event.key==='Enter')loadRules(1)">
+              <button class="btn btn-primary btn-sm" onclick="loadRules(1)">搜索</button>
+            </div>
+          </div>
+          <div class="table-container" id="rules-table-container">
+            <div class="loading"><div class="spinner"></div>加载中...</div>
+          </div>
+          <div class="pagination" id="rules-pagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-rule-detail" class="view-page">
+      <div class="back-btn" onclick="navigateTo('rules')">← 返回规则列表</div>
+      <div id="rule-detail-content">
+        <div class="loading"><div class="spinner"></div>加载中...</div>
+      </div>
+    </div>
+
+    <div id="page-snapshots" class="view-page">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">规则集快照</div>
+          <button class="btn btn-primary btn-sm" onclick="showCreateSnapshotModal()">+ 创建快照</button>
+        </div>
+        <div class="card-body" id="snapshots-container">
+          <div class="loading"><div class="spinner"></div>加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-changelog" class="view-page">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">变更日志</div>
+        </div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <div class="filter-group">
+              <label>规则编码:</label>
+              <input type="text" id="changelog-rule-code" placeholder="输入规则编码筛选..." style="width:240px;">
+            </div>
+            <div class="filter-group">
+              <label>数量:</label>
+              <select id="changelog-limit" onchange="loadChangelog()">
+                <option value="50">50条</option>
+                <option value="100">100条</option>
+                <option value="200">200条</option>
+              </select>
+            </div>
+            <div class="filter-group" style="margin-left:auto;">
+              <button class="btn btn-primary btn-sm" onclick="loadChangelog()">查询</button>
+            </div>
+          </div>
+          <div id="changelog-container">
+            <div class="loading"><div class="spinner"></div>加载中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="create-snapshot-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">创建规则集快照</div>
+      <button class="modal-close" onclick="closeModal('create-snapshot-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>快照名称 *</label>
+        <input type="text" id="snapshot-name" placeholder="如: v2026Q3、GJ18-导入完成">
+      </div>
+      <div class="form-group">
+        <label>快照描述</label>
+        <textarea id="snapshot-desc" placeholder="简要描述此次快照的背景或内容..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>创建人</label>
+        <input type="text" id="snapshot-created-by" value="admin">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('create-snapshot-modal')">取消</button>
+      <button class="btn btn-primary" onclick="createSnapshot()">创建快照</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = '/api/v1';
+let currentPage = 1;
+let currentRuleId = null;
+
+function navigateTo(page) {
+  document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+
+  const navEl = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+
+  const titles = {
+    dashboard: '仪表盘',
+    rules: '规则列表',
+    'rule-detail': '规则详情',
+    snapshots: '快照管理',
+    changelog: '变更日志',
+  };
+  document.getElementById('page-title').textContent = titles[page] || '';
+
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'rules') loadRules(1);
+  if (page === 'snapshots') loadSnapshots();
+  if (page === 'changelog') loadChangelog();
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function apiPost(path, data) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function apiPut(path, data) {
+  const res = await fetch(API_BASE + path, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function checkApiStatus() {
+  try {
+    const data = await apiGet('/health');
+    document.getElementById('api-dot').className = 'status-dot online';
+    document.getElementById('api-status-text').textContent = `API 正常 · ${data.rule_count} 条规则`;
+    return true;
+  } catch (e) {
+    document.getElementById('api-dot').className = 'status-dot';
+    document.getElementById('api-dot').style.background = 'var(--danger)';
+    document.getElementById('api-status-text').textContent = 'API 未连接';
+    return false;
+  }
+}
+
+function pillarBadge(pillar) {
+  const map = { drug: '药品', project: '项目', consumable: '耗材', drg: 'DRG' };
+  return `<span class="badge badge-pillar-${pillar}">${map[pillar] || pillar}</span>`;
+}
+
+function stageBadge(stage) {
+  const map = { pre_check: '事前', end_check: '事中', post_audit: '事后' };
+  const cls = { pre_check: 'stage-pre', end_check: 'stage-end_check', post_audit: 'stage-post' };
+  return `<span class="badge badge-${cls[stage] || 'stage-post'}">${map[stage] || stage}</span>`;
+}
+
+function severityBadge(severity) {
+  const map = { violation: '违规', suspicious: '可疑', info: '提示' };
+  return `<span class="badge badge-severity-${severity}">${map[severity] || severity}</span>`;
+}
+
+function actionBadge(action) {
+  const map = { block: '拦截', warn: '提醒', tag: '标记', pass: '放行' };
+  return `<span class="badge badge-action-${action}">${map[action] || action}</span>`;
+}
+
+async function loadDashboard() {
+  try {
+    const stats = await apiGet('/stats');
+    const pillarStats = { drug: 0, project: 0, consumable: 0, drg: 0 };
+    try {
+      const rulesData = await apiGet('/rules?limit=1');
+      if (rulesData.pillar_stats) {
+        Object.assign(pillarStats, rulesData.pillar_stats);
+      }
+    } catch (e) {}
+
+    const icons = { drug: '💊', project: '🏥', consumable: '🧪', drg: '📊' };
+    const labels = { drug: '药品规则', project: '项目规则', consumable: '耗材规则', drg: 'DRG规则' };
+    const statHtml = Object.entries(pillarStats).map(([k, v]) => `
+      <div class="stat-card">
+        <div class="stat-icon ${k}">${icons[k]}</div>
+        <div class="stat-info">
+          <div class="stat-value">${v}</div>
+          <div class="stat-label">${labels[k]}</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('dashboard-stats').innerHTML = statHtml;
+  } catch (e) {
+    document.getElementById('dashboard-stats').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">加载失败</div>
+      <div class="empty-desc">请确保 API 服务已启动</div>
+    </div>`;
+  }
+
+  try {
+    const changelog = await apiGet('/rules/changelog?limit=5');
+    if (changelog.changelog && changelog.changelog.length > 0) {
+      document.getElementById('dashboard-changelog').innerHTML = renderChangelogTimeline(changelog.changelog);
+    } else {
+      document.getElementById('dashboard-changelog').innerHTML = `<div class="empty-state">
+        <div class="empty-title">暂无变更记录</div>
+      </div>`;
+    }
+  } catch (e) {
+    document.getElementById('dashboard-changelog').innerHTML = '<div class="empty-state">暂无数据</div>';
+  }
+
+  try {
+    const snapshots = await apiGet('/rules/snapshots');
+    if (snapshots.snapshots && snapshots.snapshots.length > 0) {
+      const html = snapshots.snapshots.slice(0, 3).map(s => renderSnapshotCard(s)).join('');
+      document.getElementById('dashboard-snapshots').innerHTML = html;
+    } else {
+      document.getElementById('dashboard-snapshots').innerHTML = `<div class="empty-state">
+        <div class="empty-title">暂无快照</div>
+        <div class="empty-desc">创建第一个规则集快照来保存当前状态</div>
+      </div>`;
+    }
+  } catch (e) {
+    document.getElementById('dashboard-snapshots').innerHTML = '<div class="empty-state">暂无数据</div>';
+  }
+}
+
+let rulesCache = { total: 0, items: [] };
+
+async function loadRules(page) {
+  currentPage = page;
+  const pillar = document.getElementById('filter-pillar').value;
+  const stage = document.getElementById('filter-stage').value;
+  const active = document.getElementById('filter-active').value;
+  const search = document.getElementById('search-input').value.trim();
+  const limit = 20;
+  const offset = (page - 1) * limit;
+
+  let url = `/rules?limit=${limit}&offset=${offset}`;
+  if (pillar) url += `&pillar=${pillar}`;
+  if (stage) url += `&stage=${stage}`;
+  if (active !== '') url += `&active_only=${active === '1'}`;
+  if (search) url += `&keyword=${encodeURIComponent(search)}`;
+
+  document.getElementById('rules-table-container').innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
+
+  try {
+    const data = await apiGet(url);
+    rulesCache = data;
+
+    if (!data.items || data.items.length === 0) {
+      document.getElementById('rules-table-container').innerHTML = `<div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">没有找到规则</div>
+        <div class="empty-desc">尝试调整筛选条件</div>
+      </div>`;
+      document.getElementById('rules-pagination').innerHTML = '';
+      return;
+    }
+
+    const tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>规则编码</th>
+            <th>规则名称</th>
+            <th>柱别</th>
+            <th>类别</th>
+            <th>阶段</th>
+            <th>严重度</th>
+            <th>处置</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.items.map(r => `
+            <tr>
+              <td><span class="rule-code">${r.rule_code}</span></td>
+              <td><span class="rule-name">${r.rule_name}</span></td>
+              <td>${pillarBadge(r.pillar)}</td>
+              <td>${r.rule_category || '-'}</td>
+              <td>${stageBadge(r.stage)}</td>
+              <td>${severityBadge(r.severity)}</td>
+              <td>${actionBadge(r.action)}</td>
+              <td>${r.is_active ? '<span class="badge badge-active">启用</span>' : '<span class="badge badge-inactive">停用</span>'}</td>
+              <td>
+                <button class="btn btn-sm btn-icon" onclick="viewRule(${r.id})" title="查看详情">👁</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    document.getElementById('rules-table-container').innerHTML = tableHtml;
+
+    const totalPages = Math.ceil(data.total / limit);
+    renderPagination('rules-pagination', page, totalPages, p => loadRules(p));
+  } catch (e) {
+    document.getElementById('rules-table-container').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">加载失败</div>
+      <div class="empty-desc">${e.message}</div>
+    </div>`;
+  }
+}
+
+function renderPagination(containerId, current, total, onChange) {
+  const container = document.getElementById(containerId);
+  if (total <= 1) { container.innerHTML = ''; return; }
+
+  let buttons = '';
+  buttons += `<button class="page-btn" ${current === 1 ? 'disabled' : ''} onclick="${onChange.name}(${current - 1})">‹</button>`;
+
+  const start = Math.max(1, current - 2);
+  const end = Math.min(total, current + 2);
+  for (let i = start; i <= end; i++) {
+    buttons += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="${onChange.name}(${i})">${i}</button>`;
+  }
+
+  buttons += `<button class="page-btn" ${current === total ? 'disabled' : ''} onclick="${onChange.name}(${current + 1})">›</button>`;
+
+  container.innerHTML = `
+    <div class="pagination-info">共 ${rulesCache.total} 条，第 ${current}/${total} 页</div>
+    <div class="pagination-buttons">${buttons}</div>
+  `;
+}
+
+async function viewRule(id) {
+  currentRuleId = id;
+  navigateTo('rule-detail');
+
+  try {
+    const data = await apiGet(`/rules/${id}`);
+    const rule = data.rule;
+    document.getElementById('rule-detail-content').innerHTML = renderRuleDetail(rule);
+    loadRuleVersions(rule.rule_code);
+  } catch (e) {
+    document.getElementById('rule-detail-content').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">加载失败</div>
+      <div class="empty-desc">${e.message}</div>
+    </div>`;
+  }
+}
+
+function renderRuleDetail(rule) {
+  const conditionsJson = typeof rule.conditions === 'string' ? JSON.stringify(JSON.parse(rule.conditions), null, 2) : JSON.stringify(rule.conditions, null, 2);
+
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div style="font-size:20px;font-weight:600;margin-bottom:4px;">${rule.rule_name}</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--text-secondary);">${rule.rule_code}</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          ${pillarBadge(rule.pillar)}
+          ${stageBadge(rule.stage)}
+          ${severityBadge(rule.severity)}
+          ${rule.is_active ? '<span class="badge badge-active">启用</span>' : '<span class="badge badge-inactive">停用</span>'}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'tab-basic')">基本信息</div>
+          <div class="tab" onclick="switchTab(this,'tab-conditions')">条件DSL</div>
+          <div class="tab" onclick="switchTab(this,'tab-versions')">版本历史</div>
+        </div>
+
+        <div class="tab-content active" id="tab-basic">
+          <div class="detail-grid">
+            <div>
+              <div class="detail-section">
+                <div class="detail-section-title">规则属性</div>
+                <div class="detail-item"><div class="detail-label">规则编码</div><div class="detail-value">${rule.rule_code}</div></div>
+                <div class="detail-item"><div class="detail-label">规则名称</div><div class="detail-value">${rule.rule_name}</div></div>
+                <div class="detail-item"><div class="detail-label">规则大类</div><div class="detail-value">${rule.rule_category || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">规则子类</div><div class="detail-value">${rule.rule_subcategory || '-'}</div></div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-section-title">审核配置</div>
+                <div class="detail-item"><div class="detail-label">柱别</div><div class="detail-value">${pillarBadge(rule.pillar)}</div></div>
+                <div class="detail-item"><div class="detail-label">审核阶段</div><div class="detail-value">${stageBadge(rule.stage)}</div></div>
+                <div class="detail-item"><div class="detail-label">严重程度</div><div class="detail-value">${severityBadge(rule.severity)}</div></div>
+                <div class="detail-item"><div class="detail-label">处置动作</div><div class="detail-value">${actionBadge(rule.action)}</div></div>
+              </div>
+            </div>
+            <div>
+              <div class="detail-section">
+                <div class="detail-section-title">提示信息</div>
+                <div class="detail-item"><div class="detail-label">提示消息</div><div class="detail-value" style="font-size:13px;">${rule.action_message || '-'}</div></div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-section-title">元数据</div>
+                <div class="detail-item"><div class="detail-label">当前版本</div><div class="detail-value">v${rule.version || 1}</div></div>
+                <div class="detail-item"><div class="detail-label">来源批次</div><div class="detail-value">${rule.source_batch || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">生效日期</div><div class="detail-value">${rule.effective_date || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">失效日期</div><div class="detail-value">${rule.expired_date || '-'}</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-conditions">
+          <div class="code-block">${escapeHtml(conditionsJson)}</div>
+        </div>
+
+        <div class="tab-content" id="tab-versions">
+          <div id="rule-versions-container">
+            <div class="loading"><div class="spinner"></div>加载版本历史...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function switchTab(tabEl, tabId) {
+  tabEl.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  tabEl.closest('.card-body').querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+async function loadRuleVersions(ruleCode) {
+  try {
+    const changelog = await apiGet(`/rules/changelog?rule_code=${encodeURIComponent(ruleCode)}&limit=50`);
+    const container = document.getElementById('rule-versions-container');
+    if (!container) return;
+
+    if (changelog.changelog && changelog.changelog.length > 0) {
+      container.innerHTML = renderChangelogTimeline(changelog.changelog);
+    } else {
+      container.innerHTML = '<div class="empty-state"><div class="empty-title">暂无版本变更记录</div></div>';
+    }
+  } catch (e) {
+    const container = document.getElementById('rule-versions-container');
+    if (container) container.innerHTML = `<div class="empty-state">加载失败: ${e.message}</div>`;
+  }
+}
+
+function renderChangelogTimeline(logs) {
+  const typeMap = {
+    create: { icon: '➕', cls: 'create', label: '创建' },
+    update: { icon: '✏️', cls: 'update', label: '更新' },
+    version_upgrade: { icon: '⬆️', cls: 'update', label: '版本升级' },
+    deactivate: { icon: '⏸️', cls: 'deactivate', label: '停用' },
+    delete: { icon: '🗑️', cls: 'deactivate', label: '删除' },
+  };
+
+  return `<div class="timeline">
+    ${logs.map(log => {
+      const t = typeMap[log.change_type] || { icon: '📝', cls: '', label: log.change_type };
+      let fields = '';
+      if (log.changed_fields && typeof log.changed_fields === 'object') {
+        fields = Object.entries(log.changed_fields).map(([k, v]) => `<div><code style="font-size:11px;">${k}</code>: ${typeof v === 'object' ? JSON.stringify(v) : v}</div>`).join('');
+      } else if (log.changed_fields) {
+        fields = log.changed_fields;
+      }
+      return `
+        <div class="timeline-item">
+          <div class="timeline-dot ${t.cls}"></div>
+          <div class="timeline-title">${t.icon} ${t.label} — ${log.rule_code || ''}</div>
+          <div class="timeline-meta">${log.changed_at || ''} · by ${log.changed_by || 'system'}</div>
+          <div class="timeline-body">${fields || '无详细变更字段'}</div>
+        </div>
+      `;
+    }).join('')}
+  </div>`;
+}
+
+async function loadSnapshots() {
+  document.getElementById('snapshots-container').innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
+  try {
+    const data = await apiGet('/rules/snapshots');
+    if (!data.snapshots || data.snapshots.length === 0) {
+      document.getElementById('snapshots-container').innerHTML = `<div class="empty-state">
+        <div class="empty-icon">📸</div>
+        <div class="empty-title">还没有快照</div>
+        <div class="empty-desc">创建第一个规则集快照来保存当前规则状态</div>
+      </div>`;
+      return;
+    }
+    const html = data.snapshots.map(s => renderSnapshotCard(s)).join('');
+    document.getElementById('snapshots-container').innerHTML = html;
+  } catch (e) {
+    document.getElementById('snapshots-container').innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">加载失败</div>
+      <div class="empty-desc">${e.message}</div>
+    </div>`;
+  }
+}
+
+function renderSnapshotCard(s) {
+  const isCurrent = !s.expired_date;
+  return `
+    <div class="snapshot-card ${isCurrent ? 'current' : ''}">
+      <div class="snapshot-header">
+        <div class="snapshot-name">
+          📸 ${s.snapshot_name}
+          ${isCurrent ? '<span class="badge badge-active">当前</span>' : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" onclick="viewSnapshot('${s.snapshot_name}')">详情</button>
+        </div>
+      </div>
+      <div class="snapshot-meta">
+        <span>📊 ${s.rule_count} 条规则</span>
+        <span>👤 ${s.created_by || 'system'}</span>
+        <span>🕐 ${s.created_at || ''}</span>
+        <span>${s.effective_date ? `生效: ${s.effective_date}` : ''}</span>
+        ${s.expired_date ? `<span>失效: ${s.expired_date}</span>` : ''}
+      </div>
+      ${s.snapshot_desc ? `<div style="margin-top:8px;font-size:13px;color:var(--text-secondary);">${s.snapshot_desc}</div>` : ''}
+    </div>
+  `;
+}
+
+function viewSnapshot(name) {
+  showToast(`快照 "${name}" 详情功能开发中...`, 'info');
+}
+
+function showCreateSnapshotModal() {
+  document.getElementById('snapshot-name').value = '';
+  document.getElementById('snapshot-desc').value = '';
+  openModal('create-snapshot-modal');
+}
+
+async function createSnapshot() {
+  const name = document.getElementById('snapshot-name').value.trim();
+  const desc = document.getElementById('snapshot-desc').value.trim();
+  const createdBy = document.getElementById('snapshot-created-by').value.trim() || 'system';
+
+  if (!name) {
+    showToast('请输入快照名称', 'error');
+    return;
+  }
+
+  try {
+    await apiPost('/rules/snapshots', {
+      snapshot_name: name,
+      snapshot_desc: desc,
+      created_by: createdBy,
+    });
+    showToast('快照创建成功', 'success');
+    closeModal('create-snapshot-modal');
+    loadSnapshots();
+  } catch (e) {
+    showToast('创建失败: ' + e.message, 'error');
+  }
+}
+
+async function loadChangelog() {
+  const ruleCode = document.getElementById('changelog-rule-code').value.trim();
+  const limit = document.getElementById('changelog-limit').value;
+  const container = document.getElementById('changelog-container');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
+
+  try {
+    let url = `/rules/changelog?limit=${limit}`;
+    if (ruleCode) url += `&rule_code=${encodeURIComponent(ruleCode)}`;
+
+    const data = await apiGet(url);
+    if (!data.changelog || data.changelog.length === 0) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <div class="empty-title">暂无变更记录</div>
+      </div>`;
+      return;
+    }
+    container.innerHTML = renderChangelogTimeline(data.changelog);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">加载失败</div>
+      <div class="empty-desc">${e.message}</div>
+    </div>`;
+  }
+}
+
+function showCreateRuleModal() {
+  showToast('规则创建功能开发中...', 'info');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+checkApiStatus();
+setInterval(checkApiStatus, 30000);
+loadDashboard();
+</script>
+
+</body>
+</html>

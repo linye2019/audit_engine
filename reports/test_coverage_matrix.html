@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>规则编码与测试用例覆盖矩阵</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; background: #f5f6fa; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; margin-bottom: 6px; }
+        .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+        .stat { text-align: center; padding: 16px; border-radius: 8px; }
+        .stat .num { font-size: 24px; font-weight: bold; }
+        .stat .label { font-size: 11px; color: #666; margin-top: 4px; }
+        .section { background: white; border-radius: 10px; padding: 20px 24px; margin-top: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .section h2 { font-size: 16px; color: #1a237e; margin-bottom: 12px; border-bottom: 2px solid #e8eaf6; padding-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f5f5f5; padding: 10px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        .pass { color: #2e7d32; font-weight: bold; }
+        .fail { color: #c62828; font-weight: bold; }
+        .skip { color: #f57f17; font-weight: bold; }
+        .footer { text-align: center; padding: 20px; color: #888; font-size: 12px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>规则编码与测试用例覆盖矩阵</h1>
+        <div style="font-size:13px;opacity:0.8;">2026-07-02 07:59 | 医保智能审核引擎 V3</div>
+    </div>
+
+    <div class="summary">
+        <div class="stat" style="background:#e3f2fd;"><div class="num" style="color:#1565c0;">3904</div><div class="label">活跃规则总数</div></div>
+        <div class="stat" style="background:#e8f5e9;"><div class="num" style="color:#2e7d32;">26/27</div><div class="label">规则类别覆盖</div></div>
+        <div class="stat" style="background:#fff3e0;"><div class="num" style="color:#e65100;">6/15</div><div class="label">DRG规则覆盖</div></div>
+        <div class="stat" style="background:#fce4ec;"><div class="num" style="color:#c62828;">35/36</div><div class="label">测试通过率(97%)</div></div>
+    </div>
+
+    <div class="section">
+        <h2>rule_items 规则类别覆盖矩阵 (31类)</h2>
+        <table>
+            <tr><th>#</th><th>规则类别</th><th>规则数量</th><th>代表规则编码</th><th>说明</th><th>有测试</th><th>测试结果</th></tr>
+
+            <tr>
+                <td>1</td>
+                <td><strong>FW_XMHC</strong></td>
+                <td>937</td>
+                <td><code>XM-HC-LXZN-0001</code></td>
+                <td>项目互斥</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>YP_SYZ</strong></td>
+                <td>675</td>
+                <td><code>YP-SYZ-GJ18-*</code></td>
+                <td>药品适应症(含GJ18新105条)</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>YP_XB</strong></td>
+                <td>481</td>
+                <td><code>YP-XB-GJ01-0002</code></td>
+                <td>药品性别限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>FW_DJZJ</strong></td>
+                <td>445</td>
+                <td><code>XM-DJ-LXZN-0006</code></td>
+                <td>项目定价折价</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>FW_XMXB</strong></td>
+                <td>390</td>
+                <td><code>XM-XB-GJ01-0001</code></td>
+                <td>项目性别限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>YP_ETZY</strong></td>
+                <td>271</td>
+                <td><code>YP-ET-GJ01-0001</code></td>
+                <td>儿童专用药</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><strong>ZY_YPZF</strong></td>
+                <td>153</td>
+                <td><code>ZY-ZF-GJ11-0001</code></td>
+                <td>中药饮片支付限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td><strong>YP_EXYY</strong></td>
+                <td>126</td>
+                <td><code>YP-EX-MLXD-0001</code></td>
+                <td>二线用药</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td><strong>FW_XMPC</strong></td>
+                <td>112</td>
+                <td><code>XM-BH-LXZN-0007</code></td>
+                <td>频次限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td><strong>YP_JGJB</strong></td>
+                <td>88</td>
+                <td><code>YP-JG-MLXD-0001</code></td>
+                <td>医院等级限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td><strong>YP_JYFS</strong></td>
+                <td>35</td>
+                <td><code>YP-JY-GJ04-0001</code></td>
+                <td>就医方式限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td><strong>YP_ZFLC</strong></td>
+                <td>31</td>
+                <td><code>YP-SYZ-MLXD-0023</code></td>
+                <td>疗程限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td><strong>FW_ETZY</strong></td>
+                <td>30</td>
+                <td><code>XM-BH-LXZN-0007</code></td>
+                <td>儿童专用项目</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td><strong>YP_JYQD</strong></td>
+                <td>22</td>
+                <td><code>YP-QD-GJ10-0001</code></td>
+                <td>渠道限定(规则使用is_internet字段,引擎不支持)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td><span class="skip">SKIP(数据质量)</span></td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td><strong>YP_CBXZ</strong></td>
+                <td>19</td>
+                <td><code>YP-XZ-MLXD-0001</code></td>
+                <td>险种限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>16</td>
+                <td><strong>FW_BHGZ</strong></td>
+                <td>13</td>
+                <td><code>XM-BH-LXZN-0011</code></td>
+                <td>包含映射</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>17</td>
+                <td><strong>FW_XMLC</strong></td>
+                <td>12</td>
+                <td><code>XM-LC-*</code></td>
+                <td>项目疗程</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>18</td>
+                <td><strong>YP_ETXZ</strong></td>
+                <td>11</td>
+                <td><code>YP-ET-GJ01-0272</code></td>
+                <td>儿童限量</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>19</td>
+                <td><strong>FW_CFXZ</strong></td>
+                <td>9</td>
+                <td><code>XM-FC-LXZN-*</code></td>
+                <td>拆分限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>20</td>
+                <td><strong>FW_QZTJ</strong></td>
+                <td>7</td>
+                <td><code>XM-TJ-LXZN-0002</code></td>
+                <td>条件前置</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>21</td>
+                <td><strong>HC_WH</strong></td>
+                <td>5</td>
+                <td><code>HC-WH-LXZN-0001</code></td>
+                <td>物耗限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>22</td>
+                <td><strong>YP_NL</strong></td>
+                <td>5</td>
+                <td><code>YP-NL-MLXD-0001</code></td>
+                <td>年龄限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>23</td>
+                <td><strong>HC_SP</strong></td>
+                <td>1</td>
+                <td><code>HC-SP-TYGZ-0001</code></td>
+                <td>耗材审批</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>24</td>
+                <td><strong>HC_FY</strong></td>
+                <td>1</td>
+                <td><code>HC-CF-TYGZ-0001</code></td>
+                <td>重复使用</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>25</td>
+                <td><strong>HC_SL</strong></td>
+                <td>1</td>
+                <td><code>HC-SL-CSZZ-0001</code></td>
+                <td>数量限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>26</td>
+                <td><strong>HC_ZY</strong></td>
+                <td>1</td>
+                <td><code>HC-ZY-TYGZ-0001</code></td>
+                <td>载药耗材</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+            <tr>
+                <td>27</td>
+                <td><strong>NLXZ</strong></td>
+                <td>1</td>
+                <td><code>XM-NL-GJ08-0001</code></td>
+                <td>项目年龄限定</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td><span class="pass">PASS</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>DRG规则覆盖矩阵 (17条/15种类型)</h2>
+        <table>
+            <tr><th>#</th><th>规则类型</th><th>规则名称</th><th>有测试</th><th>备注</th></tr>
+
+            <tr>
+                <td>1</td>
+                <td><strong>WRZ</strong></td>
+                <td>DRG未入组检测</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>DFSW</strong></td>
+                <td>低风险死亡检测</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>GQZ</strong></td>
+                <td>高权重病组审查</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>abnormal_long_stay</strong></td>
+                <td>住院天数异常偏长</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>abnormal_short_stay</strong></td>
+                <td>住院天数与费用不匹配</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>transfer_case</strong></td>
+                <td>转院高额费用检测</td>
+                <td><span class="pass">✓ 有</span></td>
+                <td style="color:#888;"></td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><strong>GT</strong></td>
+                <td>高套分组(需历史数据)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td><strong>FJ</strong></td>
+                <td>分解住院(需历史数据)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td><strong>DB</strong></td>
+                <td>低标入院(需历史数据)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td><strong>SJ</strong></td>
+                <td>服务不足(需历史数据)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td><strong>ZSBP</strong></td>
+                <td>诊断手术不匹配(引擎自动触发)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td><strong>drg_drift</strong></td>
+                <td>DRG偏移(需历史数据)</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>13</td>
+                <td><strong>self_pay_anomaly</strong></td>
+                <td>自费比例异常</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>14</td>
+                <td><strong>payment_gap</strong></td>
+                <td>支付差额过大</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+            <tr>
+                <td>15</td>
+                <td><strong>surgical_drg_no_oprn</strong></td>
+                <td>无手术入手术DRG</td>
+                <td><span class="fail">✗ 无</span></td>
+                <td style="color:#888;">需历史数据支持</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>按柱别(Pillar)分布</h2>
+        <table>
+            <tr><th>柱别</th><th>规则数</th><th>占比</th><th>说明</th></tr>
+
+            <tr>
+                <td><strong>项目(X)</strong></td>
+                <td>1962</td>
+                <td>50.5%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>药品(Y)</strong></td>
+                <td>1917</td>
+                <td>49.3%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>耗材(H)</strong></td>
+                <td>8</td>
+                <td>0.2%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><strong>DRG规则</strong></td>
+                <td>17</td>
+                <td>-</td>
+                <td>独立drg_rules表</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>测试数据与规则编码匹配说明</h2>
+        <table>
+            <tr><th>维度</th><th>说明</th></tr>
+            <tr><td>测试文件</td><td><code>e2e_test_v3.py</code> — 36组费用结算测试用例</td></tr>
+            <tr><td>测试策略</td><td>每个规则类别选取1条代表规则,构建违规+合规双向验证场景</td></tr>
+            <tr><td>覆盖方式</td><td>使用真实目录编码(med_list_codg)和真实药品名称匹配规则实体</td></tr>
+            <tr><td>DRG测试</td><td>7个场景覆盖: 未入组/低风险死亡/高权重/超长/短住/转院/正常不误报</td></tr>
+            <tr><td>已知问题</td><td><span class="skip">YP_JYQD</span>(22条)规则使用<code>is_internet</code>字段,引擎不支持,需修复规则条件</td></tr>
+            <tr><td>未覆盖DRG</td><td>9种DRG规则类型需历史数据(高套/分解住院/低标入院/服务不足/偏移等),单次结算无法测试</td></tr>
+            <tr><td>性能指标</td><td>100行明细: pre_check 45ms / post_audit 78ms (含三级缓存+名称预过滤)</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        规则编码与测试用例覆盖矩阵 | 医保智能审核引擎 V3 | 2026-07-02
+    </div>
+</div>
+</body>
+</html>

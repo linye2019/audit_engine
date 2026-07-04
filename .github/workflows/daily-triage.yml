@@ -1,0 +1,226 @@
+name: Daily Triage
+
+on:
+  schedule:
+    # 北京时间工作日 8:00 (UTC 0:00)
+    - cron: '0 0 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record run start
+        id: timing
+        run: echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # --- Loop Readiness Audit (requires Node) ---
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run loop-audit
+        id: audit
+        run: |
+          npx @cobusgreyling/loop-audit . --json > /tmp/audit.json 2>/tmp/audit-err.log || true
+          if [ -s /tmp/audit.json ]; then
+            SCORE=$(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/audit.json','utf8')).score)")
+            LEVEL=$(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/audit.json','utf8')).level)")
+          else
+            SCORE="N/A"
+            LEVEL="N/A"
+          fi
+          echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
+
+      # --- Project Health (Python) ---
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: |
+          python -m pytest tests/ -v --tb=short 2>&1 | tee /tmp/pytest.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Run lint
+        id: lint
+        continue-on-error: true
+        run: |
+          ruff check . 2>&1 | tee /tmp/ruff.log
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      # --- Update STATE.md ---
+      - name: Update STATE.md
+        run: |
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SCORE="${{ steps.audit.outputs.score }}"
+          LEVEL="${{ steps.audit.outputs.level }}"
+          TEST_EXIT="${{ steps.tests.outputs.exit_code }}"
+          LINT_EXIT="${{ steps.lint.outputs.exit_code }}"
+
+          if [ "$TEST_EXIT" = "0" ]; then TEST_STATUS="pass"; else TEST_STATUS="fail (exit $TEST_EXIT)"; fi
+          if [ "$LINT_EXIT" = "0" ]; then LINT_STATUS="pass"; else LINT_STATUS="fail (exit $LINT_EXIT)"; fi
+
+          cat > STATE.md << 'STATEEOF'
+          # Loop State — Medicare Audit Engine
+
+          Last run: STATE_DATE
+          Version: 1.1.0
+          Branch: main
+
+          ## Current Status
+
+          - **Phase**: L1 — report-only, no auto-fix
+          - **Active loop**: Daily Triage (weekdays)
+          - **Tool**: Claude Code
+
+          ## Last Run Summary
+
+          | Metric | Value |
+          |--------|-------|
+          | Loop Readiness | STATE_SCORE (STATE_LEVEL) |
+          | Tests | STATE_TEST |
+          | Lint (ruff) | STATE_LINT |
+
+          ## High Priority (loop is acting or waiting on human)
+
+          _(empty — no active human gate items)_
+
+          ## Watch List
+
+          | Item | Source | Status |
+          |------|--------|--------|
+          | DSL operators: 18 operators, behavior changes require human review | manual | watch |
+          | schema.sql: no migration tooling | manual | watch |
+          | medicare_engine.db in repo root | manual | watch |
+
+          ## Known Issues
+
+          _(scan from open issues at runtime)_
+
+          ## Loop Health
+
+          | Metric | Value |
+          |--------|-------|
+          | Loop Ready Score | STATE_SCORE |
+          | Tests passing | STATE_TEST |
+          | Lint clean | STATE_LINT |
+
+          ---
+          Run log: \`loop-run-log.md\`
+          Constraints: \`loop-constraints.md\`
+          STATEEOF
+
+          sed -i "s/STATE_DATE/$DATE/" STATE.md
+          sed -i "s/STATE_SCORE/$SCORE/" STATE.md
+          sed -i "s/STATE_LEVEL/$LEVEL/" STATE.md
+          sed -i "s/STATE_TEST/$TEST_STATUS/" STATE.md
+          sed -i "s/STATE_LINT/$LINT_STATUS/" STATE.md
+
+      # --- Append Run Log ---
+      - name: Append loop-run-log
+        run: |
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SCORE="${{ steps.audit.outputs.score }}"
+          TEST_EXIT="${{ steps.tests.outputs.exit_code }}"
+          LINT_EXIT="${{ steps.lint.outputs.exit_code }}"
+
+          if [ "$TEST_EXIT" = "0" ]; then TEST_STATUS="pass"; else TEST_STATUS="fail"; fi
+          if [ "$LINT_EXIT" = "0" ]; then LINT_STATUS="pass"; else TEST_STATUS="fail"; fi
+
+          cat >> loop-run-log.md << EOF
+
+          ---
+          ## $DATE
+          - **Loop Ready**: $SCORE (${{ steps.audit.outputs.level }})
+          - **Tests**: $TEST_STATUS
+          - **Lint**: $LINT_STATUS
+          - **Actions**: report-only (L1)
+          EOF
+
+      # --- Create Draft PR if changed ---
+      - name: Create draft PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet STATE.md loop-run-log.md; then
+            echo "No changes — skip PR"
+            echo "opened=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BRANCH="automated/daily-triage-$(date -u +%Y-%m-%d)"
+          git checkout -B "$BRANCH"
+          git add STATE.md loop-run-log.md
+          git commit -m "chore(loop): daily triage update STATE.md + run log [automated]"
+
+          git push -u origin "$BRANCH" --force-with-lease
+
+          EXISTING=$(gh pr list --head "$BRANCH" --base main --state open --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            echo "PR #$EXISTING already open — skip creation"
+            echo "number=$EXISTING" >> "$GITHUB_OUTPUT"
+          else
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(loop): daily triage $(date -u +%Y-%m-%d)" \
+              --body "Automated daily triage (L1 report-only).
+
+          - **Loop Ready**: ${{ steps.audit.outputs.score }} (${{ steps.audit.outputs.level }})
+          - **Tests**: ${{ steps.tests.outputs.exit_code == '0' && '✅ pass' || '❌ fail' }}
+          - **Lint**: ${{ steps.lint.outputs.exit_code == '0' && '✅ pass' || '❌ fail' }}
+
+          > No auto-merge. Review and close manually." \
+              --draft
+            PR_NUMBER=$(gh pr view "$BRANCH" --json number -q '.number')
+            echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          fi
+          echo "opened=true" >> "$GITHUB_OUTPUT"
+
+      # --- Weekly report issue (Mondays only) ---
+      - name: Open weekly report issue
+        if: github.event_name == 'schedule' && github.run_attempt == '1'
+        run: |
+          DAY=$(date -u +%u)
+          if [ "$DAY" != "1" ]; then echo "Not Monday — skip"; exit 0; fi
+
+          EXISTING=$(gh issue list --label "loop-report" --state open --limit 1 --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            echo "Open loop-report issue #$EXISTING exists — skip"
+            exit 0
+          fi
+
+          gh label create "loop-report" --color "3ee8c5" --description "Weekly loop triage report" 2>/dev/null || true
+          gh issue create \
+            --title "Loop Report — week of $(date -u +%Y-%m-%d)" \
+            --label "loop-report" \
+            --body "## Daily Triage Weekly Summary
+
+          - **Loop Ready**: ${{ steps.audit.outputs.score }} (${{ steps.audit.outputs.level }})
+          - **Tests**: ${{ steps.tests.outputs.exit_code == '0' && ':white_check_mark: pass' || ':x: fail' }}
+          - **Lint**: ${{ steps.lint.outputs.exit_code == '0' && ':white_check_mark: pass' || ':x: fail' }}
+
+          Review STATE.md and loop-run-log.md for daily details.
+          Close or escalate any high-priority items.
+
+          _Generated by daily-triage.yml_"
+        env:
+          GH_TOKEN: ${{ github.token }}

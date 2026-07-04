@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医保审核引擎 — 主动能力分析报告</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2332;
+    --border: #2a3a4e;
+    --text: #e4e8ed;
+    --text-muted: #8899aa;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 32px;
+    text-align: center;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
+  .header .subtitle { color: var(--text-muted); font-size: 14px; }
+  .header .badge {
+    display: inline-block; margin-top: 12px; padding: 4px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); border: 1px solid rgba(234,179,8,0.3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .icon { font-size: 22px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-item {
+    flex: 1; min-width: 120px; background: rgba(255,255,255,0.03);
+    border-radius: 8px; padding: 14px 16px; text-align: center;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; line-height: 1.2; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .stat-green .stat-value { color: var(--green); }
+  .stat-yellow .stat-value { color: var(--yellow); }
+  .stat-red .stat-value { color: var(--red); }
+  .stat-blue .stat-value { color: var(--blue); }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+  .bar-label { width: 100px; text-align: right; flex-shrink: 0; color: var(--text-muted); }
+  .bar-track { flex: 1; height: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+  .bar-pct { width: 50px; text-align: right; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+
+  .conflict-item {
+    padding: 12px 16px; border-left: 3px solid var(--yellow); margin-bottom: 8px;
+    background: rgba(234,179,8,0.05); border-radius: 0 8px 8px 0;
+  }
+  .conflict-item.duplicate { border-left-color: var(--yellow); }
+  .conflict-item .type { font-weight: 600; font-size: 13px; }
+  .conflict-item .desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .change-item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .change-item:last-child { border-bottom: none; }
+  .change-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; margin-right: 8px;
+  }
+  .tag-added { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-removed { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag-modified { background: rgba(234,179,8,0.15); color: var(--yellow); }
+
+  .pillar-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; margin-right: 6px;
+  }
+  .pillar-YP { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .pillar-HC { background: rgba(168,85,247,0.15); color: var(--purple); }
+  .pillar-FW { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .pillar-BZ { background: rgba(34,197,94,0.15); color: var(--green); }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -20px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--blue); border: 2px solid var(--bg);
+  }
+  .timeline-item.done::before { background: var(--green); }
+  .timeline-item .time { font-size: 12px; color: var(--text-muted); }
+  .timeline-item .title { font-weight: 600; }
+  .timeline-item .desc { font-size: 13px; color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .footer {
+    text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;
+    border-top: 1px solid var(--border); margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 医保审核引擎 — 主动能力分析报告</h1>
+  <div class="subtitle">audit_engine · AI 审核助手 · 第 2 步主动能力</div>
+  <div>
+    <span class="badge badge-green">✅ 诊断就绪</span>
+    <span class="badge badge-yellow">🟡 冲突 9 个</span>
+    <span class="badge badge-red">⚠️ 覆盖率 17.4%</span>
+  </div>
+  <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">
+    <span style="display:inline-block;padding:2px 8px;margin:0 4px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;">violation（违规）</span>
+    <span style="display:inline-block;padding:2px 8px;margin:0 4px;border-radius:4px;background:rgba(234,179,8,0.15);color:#eab308;">suspicious（可疑）</span>
+    <span style="display:inline-block;padding:2px 8px;margin:0 4px;border-radius:4px;background:rgba(59,130,246,0.15);color:#3b82f6;">info（提示）</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============================================================ -->
+  <!-- 概览 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📈</span> 项目总览</div>
+    <div class="stat-row">
+      <div class="stat-item stat-blue"><div class="stat-value">3,904</div><div class="stat-label">总规则数</div></div>
+      <div class="stat-item stat-green"><div class="stat-value">17</div><div class="stat-label">DRG 规则</div></div>
+      <div class="stat-item stat-yellow"><div class="stat-value">193</div><div class="stat-label">测试用例</div></div>
+      <div class="stat-item stat-red"><div class="stat-value">17.4%</div><div class="stat-label">规则测试覆盖率</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-item"><div class="stat-value" style="font-size:20px;">📅 2026-07-03 19:10</div><div class="stat-label">报告生成时间</div></div>
+      <div class="stat-item"><div class="stat-value" style="font-size:20px;">✅ 4 / 4</div><div class="stat-label">主动能力模块</div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 规则变更影响分析 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔄</span> 规则变更影响分析</div>
+    <div class="card">
+      <div class="stat-row">
+        <div class="stat-item stat-green"><div class="stat-value">0</div><div class="stat-label">➕ 新增</div></div>
+        <div class="stat-item stat-red"><div class="stat-value">0</div><div class="stat-label">❌ 删除</div></div>
+        <div class="stat-item stat-yellow"><div class="stat-value">0</div><div class="stat-label">✏️ 修改</div></div>
+        <div class="stat-item stat-blue"><div class="stat-value">3,904</div><div class="stat-label">快照基线</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);">基线快照已保存: tools/audit-assistant/snapshots/rules_20260703_190556.json</p>
+      <p style="font-size:13px;color:var(--text-muted);">
+        ⚡ 首次运行无变更，下一次运行即可检测新增/删除/修改。
+        建议在 RULE_BOOK.md 更新后运行 <code>impact_analysis.py</code>。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 规则冲突检测 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">⚡</span> 规则冲突检测</div>
+    <div class="card">
+      <div class="stat-row">
+        <div class="stat-item stat-green"><div class="stat-value">0</div><div class="stat-label">🔴 高风险</div></div>
+        <div class="stat-item stat-yellow"><div class="stat-value">10</div><div class="stat-label">🟡 中风险</div></div>
+        <div class="stat-item stat-green"><div class="stat-value">0</div><div class="stat-label">🟢 低风险</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🟡 Conditions 重复（10 个冲突分组）</h3>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-MLXD-0001 · YP-SYZ-GJ12-0005 <span style="color:var(--text-muted)">(国家两库与目录限定重复)</span></div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-MLXD-0002 · YP-SYZ-GJ12-0026</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ13-0034 · YP-SYZ-MLXD-0004</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ12-0021 · YP-SYZ-MLXD-0036</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ12-0022 · YP-SYZ-MLXD-0037</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ12-0036 · YP-SYZ-MLXD-0038</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ12-0014 · YP-SYZ-MLXD-0039</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-MLXD-0057 · YP-SYZ-GJ12-0015</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type">2 条规则 conditions 完全相同</div>
+        <div class="desc">YP-SYZ-GJ12-0016 · YP-SYZ-MLXD-0058</div>
+      </div>
+      <div class="conflict-item duplicate">
+        <div class="type" style="color:var(--yellow)">⚠️ 378 条规则 conditions 完全相同</div>
+        <div class="desc">
+          XM-DJ-GJ02-0079 · XM-DJ-GJ02-0159 · XM-DJ-GJ02-0330 · XM-DJ-GJ02-0087 · XM-DJ-GJ02-0027 · 等
+          <br><span style="color:var(--text-muted)">均为 FW_DJZJ（项目定价折价）类规则，来自国家两库 GI02 批次</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 规则覆盖率分析 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> 规则覆盖率分析</div>
+    <div class="card">
+      <div class="stat-row">
+        <div class="stat-item stat-green"><div class="stat-value">675</div><div class="stat-label">✅ 已覆盖</div></div>
+        <div class="stat-item stat-red"><div class="stat-value">3,212</div><div class="stat-label">❌ 未覆盖</div></div>
+        <div class="stat-item stat-yellow"><div class="stat-value">17.4%</div><div class="stat-label">📊 总覆盖率</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>按支柱分布</h3>
+      <div class="bar-row">
+        <span class="bar-label"><span class="pillar-badge pillar-YP">YP</span> 药品</span>
+        <div class="bar-track"><div class="bar-fill" style="width:35%;background:var(--blue);"></div></div>
+        <span class="bar-pct" style="color:var(--blue);">1,917</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label"><span class="pillar-badge pillar-FW">FW</span> 服务</span>
+        <div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--yellow);"></div></div>
+        <span class="bar-pct" style="color:var(--yellow);">1,962</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label"><span class="pillar-badge pillar-HC">HC</span> 耗材</span>
+        <div class="bar-track"><div class="bar-fill" style="width:0.2%;background:var(--purple);"></div></div>
+        <span class="bar-pct" style="color:var(--purple);">8</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label"><span class="pillar-badge pillar-BZ">BZ</span> 病种</span>
+        <div class="bar-track"><div class="bar-fill" style="width:0.4%;background:var(--green);"></div></div>
+        <span class="bar-pct" style="color:var(--green);">17</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>按规则类别覆盖率</h3>
+      <table>
+        <thead>
+          <tr><th>类别</th><th>覆盖率</th><th>已覆盖</th><th>总计</th><th style="text-align:right;">进度条</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pillar-badge pillar-YP">YP</span> YP_SYZ</td><td style="color:var(--green);font-weight:600;">100.0%</td><td>675</td><td>675</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:100%;height:100%;background:var(--green);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_WH</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>5</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_SP</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_FY</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_PD</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_SL</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_ZF</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-HC">HC</span> HC_ZY</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>1</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-FW">FW</span> FW_XMHC</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>937</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-FW">FW</span> FW_DJZJ</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>445</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-FW">FW</span> FW_XMXB</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>390</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-YP">YP</span> YP_XB</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>481</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-YP">YP</span> YP_ETZY</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>271</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-YP">YP</span> ZY_YPZF</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>153</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+          <tr><td><span class="pillar-badge pillar-YP">YP</span> YP_EXYY</td><td style="color:var(--red);font-weight:600;">0.0%</td><td>0</td><td>126</td><td style="text-align:right;"><div style="display:inline-block;width:120px;height:14px;background:rgba(255,255,255,0.05);border-radius:7px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:7px;"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>未覆盖规则示例（前 20 条）</h3>
+      <div style="font-size:13px;">
+        <div class="change-item"><span class="pillar-badge pillar-HC">HC</span> <span class="change-tag tag-added">end_check</span> HC-WH-LXZN-0001 — HC_WH 耗材物耗限定</div>
+        <div class="change-item"><span class="pillar-badge pillar-HC">HC</span> <span class="change-tag tag-added">end_check</span> HC-WH-LXZN-0002 — HC_WH 耗材物耗限定</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-DJ-LXZN-0001 — FW_DJZJ 项目定价折价</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-DJ-LXZN-0002 — FW_DJZJ 项目定价折价</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-BH-LXZN-0001 — FW_BHGZ 项目包含规则</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-BH-LXZN-0002 — FW_BHGZ 项目包含规则</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-TJ-LXZN-0001 — FW_QZTJ 前置条件</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-DJ-LXZN-0003 — FW_DJZJ 项目定价折价</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-HC-LXZN-0001 — FW_XMHC 项目互斥</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-HC-LXZN-0002 — FW_XMHC 项目互斥</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-FC-LXZN-0001 — FW_CFXZ 项目拆分限制</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">post_audit</span> XM-BH-LXZN-0003 — BM_YY 编码映射</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">post_audit</span> XM-BH-LXZN-0004 — BM_YY 编码映射</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">post_audit</span> XM-BH-LXZN-0005 — BM_YY 编码映射</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-WH-LXZN-0001 — HC_WH 耗材物耗限定</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-BH-LXZN-0006 — FW_BHGZ 项目包含规则</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-DJ-LXZN-0004 — FW_DJZJ 项目定价折价</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-HC-LXZN-0003 — FW_XMHC 项目互斥</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-HC-LXZN-0004 — FW_XMHC 项目互斥</div>
+        <div class="change-item"><span class="pillar-badge pillar-FW">FW</span> <span class="change-tag tag-added">end_check</span> XM-HC-LXZN-0005 — FW_XMHC 项目互斥</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 总结与建议 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💡</span> 总结与建议</div>
+    <div class="summary-grid">
+      <div class="card">
+        <h3>✅ 已就绪</h3>
+        <ul style="font-size:13px;color:var(--text-muted);list-style:none;padding:0;">
+          <li style="padding:4px 0;">✓ 规则变更影响分析（基线已保存）</li>
+          <li style="padding:4px 0;">✓ 规则冲突检测（10 个冲突已发现）</li>
+          <li style="padding:4px 0;">✓ 规则覆盖率分析（17.4%）</li>
+          <li style="padding:4px 0;">✓ 测试结果诊断（JUnit XML 解析）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>📋 建议下一步</h3>
+        <ul style="font-size:13px;color:var(--text-muted);list-style:none;padding:0;">
+          <li style="padding:4px 0;">1. 处理 378 条重复 conditions（FW_DJZJ）</li>
+          <li style="padding:4px 0;">2. 运行 <code>/gen-tests</code> 补全 FW/HC 覆盖</li>
+          <li style="padding:4px 0;">3. 实现第 3 步：自主智能体 auto-fix</li>
+          <li style="padding:4px 0;">4. 设置每周规则快照自动保存</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 实施进度 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📌</span> 实施进度</div>
+    <div class="card">
+      <div class="timeline">
+        <div class="timeline-item done">
+          <div class="time">已完成</div>
+          <div class="title">第 1 步：对话助手</div>
+          <div class="desc">解释审核结果 · 查询规则 · 查询目录 · 诊断失败</div>
+        </div>
+        <div class="timeline-item done">
+          <div class="time">✅ 刚刚完成</div>
+          <div class="title">第 2 步：主动能力</div>
+          <div class="desc">规则变更影响分析 · 冲突检测 · 覆盖率分析</div>
+        </div>
+        <div class="timeline-item">
+          <div class="time">待启动</div>
+          <div class="title">第 3 步：自主智能体</div>
+          <div class="desc">多步自主规划 · 自动修复 · 循环控制 · 熔断回滚</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  audit_engine · AI 医保审核智能体 · 由 gen-audit-tests skill 自动生成
+  <br>报告路径: reports/active_capabilities_report.html
+</div>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "headBoilerplate": "<link rel=\"stylesheet\" href=\"../../colors_and_type.css\">",
+  "corePreviewComponents": [
+    {
+      "slug": "button",
+      "reason": "fixed slot \"button\"; semantic=Button:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/button.json",
+      "priority": 1,
+      "slot": "button"
+    },
+    {
+      "slug": "sidebar",
+      "reason": "fixed slot \"navigation\"; semantic=Sidebar:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/sidebar.json",
+      "priority": 2,
+      "slot": "navigation"
+    },
+    {
+      "slug": "card",
+      "reason": "fixed slot \"card\"; semantic=Card:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/card.json",
+      "priority": 3,
+      "slot": "card"
+    },
+    {
+      "slug": "badge",
+      "reason": "fixed slot \"tag\"; semantic=Badge:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/badge.json",
+      "priority": 4,
+      "slot": "tag"
+    },
+    {
+      "slug": "table",
+      "reason": "fixed slot \"table\"; semantic=Table:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/table.json",
+      "priority": 5,
+      "slot": "table"
+    },
+    {
+      "slug": "input",
+      "reason": "fallback after fixed slots; semantic=TextInput:0.75; policy=fixed-slots-first",
+      "evidenceFile": "components/input.json",
+      "priority": 6
+    }
+  ],
+  "supportEvidenceComponents": [],
+  "allowedComponents": [
+    "button",
+    "sidebar",
+    "card",
+    "badge",
+    "table",
+    "input"
+  ],
+  "screenBlueprints": [
+    {
+      "name": null,
+      "componentSlugs": [],
+      "role": "primary"
+    },
+    {
+      "name": null,
+      "componentSlugs": [],
+      "role": "secondary"
+    },
+    {
+      "name": null,
+      "componentSlugs": [],
+      "role": "secondary"
+    }
+  ],
+  "productContext": {
+    "kitType": "dashboard",
+    "productType": "Dashboard",
+    "dominantCopy": [],
+    "pageNames": [],
+    "selectedFrameNames": []
+  },
+  "selectionPolicy": "fixed-slots-first",
+  "slotAssignments": [
+    {
+      "slot": "button",
+      "slug": "button",
+      "reason": "name"
+    },
+    {
+      "slot": "navigation",
+      "slug": "sidebar",
+      "reason": "name"
+    },
+    {
+      "slot": "card",
+      "slug": "card",
+      "reason": "name"
+    },
+    {
+      "slot": "tag",
+      "slug": "badge",
+      "reason": "name"
+    },
+    {
+      "slot": "table",
+      "slug": "table",
+      "reason": "name"
+    }
+  ],
+  "missingFixedSlots": [
+    "menu"
+  ],
+  "fallbackComponents": [
+    "input"
+  ],
+  "needsNarrative": false,
+  "forbiddenInventedComponents": [],
+  "lowConfidence": false,
+  "warnings": [
+    "missing-fixed-slot:menu"
+  ]
+}

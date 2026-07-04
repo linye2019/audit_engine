@@ -1,0 +1,54 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": ".*\\.(ts|tsx|js|jsx)$",
+        "hooks": [
+          {
+            "type": "command",
+            "description": "ESLint 自动修复",
+            "command": "cd +project+ && npx eslint --fix +file+ 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": ".*\\.py$",
+        "hooks": [
+          {
+            "type": "command",
+            "description": "Ruff 自动格式化 + lint 修复",
+            "command": "cd +project+ && (ruff check --fix +file+ 2>/dev/null; ruff format +file+ 2>/dev/null) || true"
+          }
+        ]
+      },
+      {
+        "matcher": "audit_engine/(core|dsl|matcher|models|repo)/.*\\.py$",
+        "hooks": [
+          {
+            "type": "command",
+            "description": "修改核心引擎后运行关联测试",
+            "command": "cd +project+ && python -m pytest tests/ -x -q --timeout=30 2>&1 | tail -20"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": {
+      "blockFiles": [".env", ".env.local", ".env.production"],
+      "message": "⚠️ .env 文件包含敏感配置，请勿直接修改。使用 .env.example 作为参考。"
+    },
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"AtomCode 等待您的输入\" with title \"AtomCode\"' 2>/dev/null || afplay /System/Library/Sounds/Ping.aiff 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": ["Read", "Write", "Edit", "Glob", "Grep", "Bash(npm test:*)", "Bash(git commit:*)", "Bash(python -m pytest:*)"]
+  }
+}

@@ -1,0 +1,121 @@
+/* ═══════════════════════════════════════════════════════════════
+   components.css — Design System Component Definitions
+   Auto-extracted from preview/component-*.html
+   DO NOT EDIT MANUALLY — regenerate via extract-components-css.mjs
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Badge ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">审核状态</span> <span class="badge success">合规</span> <span class="badge warning">可疑</span> <span class="badge error">违规</span> <span class="badge info">信息</span>
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+  .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: var(--radius-full); font-size: var(--font-size-caption); font-weight: var(--font-weight-body); white-space: nowrap; line-height: var(--line-height-caption); }
+  .badge.success { background: rgba(16,185,129,.1); color: var(--med-green-700); }
+  .badge.warning { background: rgba(245,158,11,.1); color: var(--med-amber-700); }
+  .badge.error { background: rgba(239,68,68,.1); color: var(--med-red-700); }
+  .badge.info { background: rgba(6,182,212,.1); color: var(--med-cyan-700); }
+
+/* ── Button ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">主操作</span><button class="btn primary sm">提交审核</button><button class="btn primary md">开始审核</button><button class="btn primary lg">生成报告</button>
+*/
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: none; cursor: pointer; font-family: var(--font-family-base); font-weight: var(--font-weight-body); white-space: nowrap; flex-shrink: 0; border-radius: var(--radius-md); transition: background .15s, border-color .15s; }
+.btn.sm { height: var(--size-button-height-sm); min-width: var(--size-button-height-sm); padding: 6px 14px; font-size: var(--font-size-caption); }
+.btn.md { height: var(--size-button-height); min-width: var(--size-button-height); padding: 8px 20px; font-size: var(--font-size-body); }
+.btn.lg { height: var(--size-button-height-lg); min-width: var(--size-button-height-lg); padding: 10px 28px; font-size: var(--font-size-lead); }
+.btn.primary { background: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.secondary { background: transparent; color: var(--color-primary); border: 1px solid var(--color-primary); }
+.btn.secondary:hover { background: var(--interactive-hover); }
+.btn.ghost { background: transparent; color: var(--color-on-surface-variant); }
+.btn.ghost:hover { background: var(--interactive-hover); }
+.btn.danger { background: var(--color-error); color: var(--color-on-error); }
+.btn.danger:hover { filter: brightness(.92); }
+.btn:disabled { opacity: .5; pointer-events: none; }
+
+/* ── Card ──────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">默认卡片</span> <div class="card" style="flex:1;min-width:0;" data-evidence-sample="default"> <div class="card-header"> <span class="card-title">智能分析</span> <span class="card-meta">2024年Q1</span>
+*/
+/* Component definitions — extracted to components.css */
+.card { background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); border: 1px solid var(--color-border); padding: var(--space-5); display: flex; flex-direction: column; transition: box-shadow .15s; }
+.card:hover { box-shadow: var(--shadow-3); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+.card-title { font-family: var(--font-heading); font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); color: var(--color-on-surface); line-height: var(--line-height-h4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.card-meta { font-size: var(--font-size-caption); font-weight: var(--font-weight-caption); color: var(--color-on-surface-variant); white-space: nowrap; flex-shrink: 0; margin-left: var(--space-2); }
+.card-body { font-size: var(--font-size-body); font-weight: var(--font-weight-body); color: var(--color-on-surface); line-height: var(--line-height-body); flex: 1; }
+.card-footer { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-outline-variant); }
+.card-action { font-size: var(--font-size-caption); font-weight: var(--font-weight-caption); color: var(--color-primary); cursor: pointer; white-space: nowrap; transition: color .15s; }
+.card-action:hover { color: var(--color-primary-hover); }
+.card-action.secondary { color: var(--color-on-surface-variant); }
+.card-action.secondary:hover { color: var(--color-on-surface); }
+.card-stat { background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); border: 1px solid var(--color-border); padding: var(--space-5); display: flex; align-items: center; gap: var(--space-4); transition: box-shadow .15s; }
+.card-stat:hover { box-shadow: var(--shadow-3); }
+.stat-icon { width: 48px; height: 48px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-icon.primary { background: var(--color-primary-container); color: var(--color-on-primary-container); }
+.stat-icon.success { background: var(--med-green-50); color: var(--color-success); }
+.stat-icon.warning { background: var(--med-amber-50); color: var(--color-warning); }
+.stat-info { min-width: 0; }
+.stat-value { font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-h3); color: var(--color-on-surface); line-height: 1.2; white-space: nowrap; }
+.stat-label { font-size: var(--font-size-caption); font-weight: var(--font-weight-caption); color: var(--color-on-surface-variant); line-height: var(--line-height-caption); margin-top: 2px; white-space: nowrap; }
+.card-accent { background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-1); padding: var(--space-4); border-left: 3px solid var(--color-primary); transition: box-shadow .15s; }
+.card-accent:hover { box-shadow: var(--shadow-2); }
+.card-accent.accent-success { border-left-color: var(--color-success); }
+.card-accent.accent-warning { border-left-color: var(--color-warning); }
+.card-accent-title { font-family: var(--font-heading); font-size: var(--font-size-body); font-weight: var(--font-weight-h4); color: var(--color-on-surface); line-height: var(--line-height-h4); margin-bottom: var(--space-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-accent-desc { font-size: var(--font-size-caption); font-weight: var(--font-weight-caption); color: var(--color-on-surface-variant); line-height: var(--line-height-caption); }
+
+/* ── Input ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">默认输入</span> <div class="input-group"> <span class="input-label">规则名称</span> <input class="input-field" type="text" placeholder="请输入规则名称...">
+*/
+.input-group { display: flex; flex-direction: column; gap: var(--space-1); min-width: 180px; flex-shrink: 0; }
+  .input-group-flex { flex: 1 1 0; min-width: 240px; }
+  .input-label { font-size: var(--font-size-caption); font-weight: var(--font-weight-lead); color: var(--color-on-surface); white-space: nowrap; }
+  .input-wrapper { position: relative; display: flex; align-items: center; }
+  .input-field { width: 100%; height: var(--size-input); padding: var(--space-2) var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-on-surface); outline: none; transition: border-color .15s, box-shadow .15s; }
+  .input-field::placeholder { color: var(--color-on-surface-variant); }
+  .input-field:hover { border-color: var(--color-on-surface-variant); }
+  .input-field:focus { border-color: var(--ring); box-shadow: 0 0 0 3px var(--interactive-focus); }
+  .input-field:disabled { background: var(--color-surface-dim); color: var(--color-on-surface-variant); cursor: not-allowed; }
+  .input-field:disabled:hover { border-color: var(--color-border); }
+  .input-helper { font-size: var(--font-size-caption); color: var(--color-on-surface-variant); }
+  .search-icon { position: absolute; left: var(--space-3); width: var(--size-icon-sm); height: var(--size-icon-sm); color: var(--color-on-surface-variant); pointer-events: none; }
+  .input-search { border-radius: var(--radius-lg); padding-left: var(--space-8); }
+  .textarea-field { width: 100%; min-height: 80px; padding: var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-on-surface); outline: none; resize: vertical; transition: border-color .15s, box-shadow .15s; }
+  .textarea-field::placeholder { color: var(--color-on-surface-variant); }
+  .textarea-field:hover { border-color: var(--color-on-surface-variant); }
+  .textarea-field:focus { border-color: var(--ring); box-shadow: 0 0 0 3px var(--interactive-focus); }
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+/* @anatomy
+   <nav class="sidebar"> <div class="sidebar-logo">医保审核引擎
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+.sidebar { width: var(--sidebar-width); height: 480px; background: var(--med-gray-900); display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden; flex-shrink: 0; }
+.sidebar-logo { padding: var(--space-4) var(--space-5); color: #ffffff; font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); border-bottom: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+.sidebar-nav { flex: 1; overflow-y: auto; padding: var(--space-3) 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.sidebar-nav-item { display: flex; align-items: center; padding: var(--space-3) var(--space-5); color: rgba(255,255,255,.7); font-size: var(--font-size-body); cursor: pointer; transition: background .15s, color .15s, border-color .15s; border-left: 3px solid transparent; white-space: nowrap; text-decoration: none; }
+.sidebar-nav-item:hover { background: var(--interactive-hover); color: #ffffff; }
+.sidebar-nav-item.active { background: var(--interactive-focus); color: #ffffff; border-left-color: var(--primary); font-weight: var(--font-weight-lead); }
+.sidebar-footer { padding: var(--space-3) var(--space-5); border-top: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.5); font-size: var(--font-size-caption); white-space: nowrap; }
+
+/* ── Table ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">Default</span>
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+  .table-wrap { width: 100%; overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-caption); line-height: var(--line-height-body); }
+  .data-table th { padding: var(--space-3) var(--space-4); text-align: left; font-weight: var(--font-weight-eyebrow); font-size: var(--font-size-eyebrow); color: var(--color-on-surface-variant); background: var(--color-surface-dim); white-space: nowrap; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 1; }
+  .data-table td { padding: var(--space-3) var(--space-4); vertical-align: middle; border-bottom: 1px solid var(--color-outline-variant); white-space: nowrap; }
+  .data-table tbody tr { transition: filter .15s; }
+  .data-table tbody tr:hover { filter: brightness(0.97); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table.striped tbody tr:nth-child(even) { background: var(--color-surface-container-low); }
+  .badge { display: inline-flex; align-items: center; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: 11px; font-weight: 500; white-space: nowrap; line-height: 1.4; min-width: 20px; }
+  .badge-error { background: var(--med-red-50); color: var(--color-error); }
+  .badge-warning { background: var(--med-amber-50); color: var(--color-warning); }
+  .badge-info { background: var(--med-blue-50); color: var(--med-blue-500); }
+  .badge-success { background: var(--med-green-50); color: var(--color-success); }
+  .badge-muted { background: var(--color-surface-container-high); color: var(--color-on-surface-variant); }

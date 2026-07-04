@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>医保规则覆盖热力图 V2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; background: #f5f6fa; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; margin-bottom: 6px; }
+        .header .sub { font-size: 13px; opacity: 0.8; }
+        .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+        .stat { text-align: center; padding: 16px 8px; border-radius: 8px; }
+        .stat .num { font-size: 24px; font-weight: bold; }
+        .stat .label { font-size: 11px; color: #666; margin-top: 4px; }
+        .section { background: white; border-radius: 10px; padding: 20px 24px; margin-top: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .section h2 { font-size: 16px; color: #1a237e; margin-bottom: 12px; border-bottom: 2px solid #e8eaf6; padding-bottom: 8px; }
+        .heatmap { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0; }
+        .cell { border-radius: 8px; padding: 14px 8px; text-align: center; transition: transform 0.2s; cursor: pointer; }
+        .cell:hover { transform: scale(1.05); z-index: 10; }
+        .cell .atc-code { font-size: 20px; font-weight: bold; }
+        .cell .atc-name { font-size: 10px; margin-top: 2px; }
+        .cell .coverage { font-size: 16px; font-weight: bold; margin-top: 4px; }
+        .cell .detail { font-size: 10px; color: #666; margin-top: 2px; }
+        .cell .bar { height: 4px; border-radius: 2px; margin-top: 6px; background: #e0e0e0; }
+        .cell .bar-fill { height: 100%; border-radius: 2px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f5f5f5; padding: 10px; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        .gap-flag { background: #fff8e1; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: #e65100; }
+        .improve { color: #2e7d32; font-weight: bold; }
+        .footer { text-align: center; padding: 20px; color: #888; font-size: 12px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-left: 6px; }
+        .badge-new { background: #e8f5e9; color: #2e7d32; }
+        .badge-fix { background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>医保规则覆盖热力图 V2 <span class="badge badge-new">+105规则</span> <span class="badge badge-fix">ATC 98.3%</span></h1>
+        <div class="sub">按ATC治疗领域分类 | 第三阶段优化后 | 2026-07-02 03:17</div>
+    </div>
+
+    <div class="summary">
+        <div class="stat" style="background:#e3f2fd;"><div class="num" style="color:#1565c0;">4567</div><div class="label">药品总数</div></div>
+        <div class="stat" style="background:#e8f5e9;"><div class="num" style="color:#2e7d32;">1572</div><div class="label">有规则覆盖</div></div>
+        <div class="stat" style="background:#fff3e0;"><div class="num" style="color:#e65100;">2995</div><div class="label">无规则覆盖</div></div>
+        <div class="stat" style="background:#fce4ec;"><div class="num" style="color:#c62828;">34.4%</div><div class="label">规则覆盖率</div></div>
+        <div class="stat" style="background:#f3e5f5;"><div class="num" style="color:#6a1b9a;">98.3%</div><div class="label">ATC编码覆盖率</div></div>
+    </div>
+
+    <div class="section">
+        <h2>ATC一级分类覆盖热力图</h2>
+        <div class="heatmap">
+
+            <div class="cell" style="background:#c8e6c9;" title="抗感染药: 1/2 (50.0%)">
+                <div class="atc-code" style="color:#2e7d32;">J</div>
+                <div class="atc-name">抗感染药</div>
+                <div class="coverage" style="color:#2e7d32;">50%</div>
+                <div class="detail">1/2</div>
+                <div class="bar"><div class="bar-fill" style="width:50.0%;background:#2e7d32;"></div></div>
+            </div>
+            <div class="cell" style="background:#ffcdd2;" title="抗肿瘤及免疫: 0/1 (0.0%)">
+                <div class="atc-code" style="color:#c62828;">L</div>
+                <div class="atc-name">抗肿瘤及免疫</div>
+                <div class="coverage" style="color:#c62828;">0%</div>
+                <div class="detail">0/1</div>
+                <div class="bar"><div class="bar-fill" style="width:0.0%;background:#c62828;"></div></div>
+            </div>
+            <div class="cell" style="background:#fff9c4;" title="中药/自定义分类: 1532/4485 (34.2%)">
+                <div class="atc-code" style="color:#f57f17;">X</div>
+                <div class="atc-name">中药/自定义分类</div>
+                <div class="coverage" style="color:#f57f17;">34%</div>
+                <div class="detail">1532/4485</div>
+                <div class="bar"><div class="bar-fill" style="width:34.15830546265329%;background:#f57f17;"></div></div>
+            </div>
+            <div class="cell" style="background:#fff9c4;" title="未分类: 39/79 (49.4%)">
+                <div class="atc-code" style="color:#f57f17;">未知</div>
+                <div class="atc-name">未分类</div>
+                <div class="coverage" style="color:#f57f17;">49%</div>
+                <div class="detail">39/79</div>
+                <div class="bar"><div class="bar-fill" style="width:49.36708860759494%;background:#f57f17;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>ATC分类覆盖详情</h2>
+        <table>
+            <tr><th>ATC</th><th>治疗领域</th><th>总数</th><th>有规则</th><th>缺口</th><th>覆盖率</th><th>有限制条件(应补充)</th><th>缺口示例</th></tr>
+
+            <tr>
+                <td><strong>J</strong></td>
+                <td>抗感染药</td>
+                <td>2</td>
+                <td>1</td>
+                <td>1</td>
+                <td style="color:#2e7d32;font-weight:bold;">50.0%</td>
+                <td>0</td>
+                <td style="font-size:12px;color:#888;">-</td>
+            </tr>
+            <tr>
+                <td><strong>L</strong></td>
+                <td>抗肿瘤及免疫</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td style="color:#c62828;font-weight:bold;">0.0%</td>
+                <td> <span class="gap-flag">1</span></td>
+                <td style="font-size:12px;color:#888;">甲氨蝶呤片</td>
+            </tr>
+            <tr>
+                <td><strong>X</strong></td>
+                <td>中药/自定义分类</td>
+                <td>4485</td>
+                <td>1532</td>
+                <td>2953</td>
+                <td style="color:#e65100;font-weight:bold;">34.2%</td>
+                <td> <span class="gap-flag">72</span></td>
+                <td style="font-size:12px;color:#888;">促肝细胞生长素, 还原型谷胱甘肽(谷胱甘肽), 异甘草酸镁</td>
+            </tr>
+            <tr>
+                <td><strong>未知</strong></td>
+                <td>未分类</td>
+                <td>79</td>
+                <td>39</td>
+                <td>40</td>
+                <td style="color:#e65100;font-weight:bold;">49.4%</td>
+                <td>0</td>
+                <td style="font-size:12px;color:#888;">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>系统覆盖总览</h2>
+        <table>
+            <tr><th>维度</th><th>总数</th><th>有规则</th><th>缺口</th><th>覆盖率</th><th>备注</th></tr>
+            <tr>
+                <td>药品(YP)</td>
+                <td>4567</td>
+                <td>1572</td>
+                <td>2995</td>
+                <td style="font-weight:bold;color:#e65100;">34.4%</td>
+                <td>新增GJ18批次105条适应症规则</td>
+            </tr>
+            <tr>
+                <td>诊疗项目(FW)</td>
+                <td>2141</td>
+                <td>929</td>
+                <td>1212</td>
+                <td style="font-weight:bold;color:#e65100;">43.4%</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>ATC编码覆盖</td>
+                <td>4567</td>
+                <td>4488</td>
+                <td>79</td>
+                <td style="font-weight:bold;color:#2e7d32;">98.3%</td>
+                <td class="improve">较V1提升: 40.3% → 98.3%</td>
+            </tr>
+            <tr>
+                <td>DRG规则</td>
+                <td>-</td>
+                <td>17条</td>
+                <td>-</td>
+                <td style="color:#e65100;">需持续扩充</td>
+                <td class="improve">较V1提升: 7条 → 17条</td>
+            </tr>
+            <tr>
+                <td>活跃规则总数</td>
+                <td colspan="4">3887条rule_items + 17条drg_rules</td>
+                <td class="improve">较V1提升: 3782 → 3887</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>第三阶段优化成果</h2>
+        <table>
+            <tr><th>优化项</th><th>V1状态</th><th>V2状态</th><th>改善</th></tr>
+            <tr><td>药品规则覆盖</td><td>1467种(32.1%)</td><td>1572种(34.4%)</td><td class="improve">+105种</td></tr>
+            <tr><td>ATC编码覆盖</td><td>1839种(40.3%)</td><td>4488种(98.3%)</td><td class="improve">+2649种</td></tr>
+            <tr><td>DRG规则数</td><td>7条</td><td>17条</td><td class="improve">+10条</td></tr>
+            <tr><td>100行性能(post_audit)</td><td>~659ms</td><td>~78ms</td><td class="improve">-88%</td></tr>
+            <tr><td>API接口可用性</td><td>3个500错误</td><td>全部200</td><td class="improve">100%</td></tr>
+            <tr><td>E2E测试</td><td>10/10</td><td>10/10</td><td class="improve">无回归</td></tr>
+            <tr><td>对抗边界测试</td><td>-</td><td>29/29</td><td class="improve">新增</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        覆盖热力图 V2 | 颜色越绿覆盖率越高，越红缺口越大 | 黄色标注=有限制条件但未生成规则的药品
+    </div>
+</div>
+</body>
+</html>

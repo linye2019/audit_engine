@@ -1,0 +1,23 @@
+{
+  "slug": "card",
+  "schemaVersion": 2,
+  "name": "Card",
+  "category": "layout",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [{"type": "Card", "evidence": "Content container with header, body, and optional footer"}],
+  "variantDimensions": [
+    {"name": "variant", "values": ["default", "stat", "accent-left"]}
+  ],
+  "representativeVariants": [
+    {"variant": "default", "whySelected": "Standard content card", "traits": {"bg": "var(--color-surface)", "radius": "var(--radius-lg)", "shadow": "var(--shadow-2)", "border": "1px solid var(--color-border)", "padding": "var(--space-5)"}, "childrenDigest": ["header?", "body", "footer?"]},
+    {"variant": "stat", "whySelected": "Dashboard stat card with icon", "traits": {"bg": "var(--color-surface)", "radius": "var(--radius-lg)", "shadow": "var(--shadow-2)", "padding": "var(--space-5)", "display": "flex", "alignItems": "center", "gap": "var(--space-4)"}, "childrenDigest": ["stat-icon", "stat-info(value+label)"]},
+    {"variant": "accent-left", "whySelected": "Status card with left border accent", "traits": {"bg": "var(--color-surface)", "radius": "var(--radius-md)", "shadow": "var(--shadow-1)", "borderLeft": "3px solid var(--color-primary)", "padding": "var(--space-4)"}, "childrenDigest": ["title", "description"]}
+  ],
+  "anatomy": ["header (optional)", "body", "footer (optional)"],
+  "structurePatterns": ["flex column", "header: flex row space-between", "body: flex-1"],
+  "usageHints": {"priorityHint": "high", "spacing": "Card padding uses --space-5, gap between cards uses --space-4", "states": "hover elevates shadow"},
+  "doNotInvent": ["card with tabs", "expandable card", "draggable card"],
+  "unknowns": [],
+  "keyInsightSeed": "Clean elevated card with left accent border for status"
+}
